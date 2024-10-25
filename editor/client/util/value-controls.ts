@@ -279,7 +279,12 @@ export function createValueControl(
 
       const valueDisplay = elem("code", {}, []);
       const clear = elem("button", { type: "button" }, [icon(X)]);
-      const control = elem("div", { className: "entity-inputs" }, [valueDisplay, clear]);
+      const spacer = elem("div", { className: "spacer" });
+      const control = elem("div", { className: "entity-inputs" }, [
+        valueDisplay,
+        spacer,
+        clear,
+      ]);
 
       const getEntity = (): Entity | null | undefined => {
         const dragTarget = document.querySelector(
@@ -309,8 +314,13 @@ export function createValueControl(
       const refresh = () => {
         const value = opts.get();
         const entity = value ? game.entities.lookupByRef(value) : undefined;
-        valueDisplay.textContent =
-          entity?.id.replace("game.world._.EditEntities._.", "game.") ?? "";
+
+        valueDisplay.style.opacity = entity === undefined ? "0.65" : "";
+        const id =
+          entity?.id.replace("game.world._.EditEntities._.", "game.") ?? "[No Entity Selected]";
+
+        valueDisplay.title = id;
+        valueDisplay.textContent = id;
       };
 
       refresh();

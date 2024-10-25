@@ -53,19 +53,25 @@ dreamlab-data-table {
         align-items: center;
 
         & > code {
-          flex: 1;
+          max-width: calc(100% - 1rem);
           overflow: clip;
           text-overflow: ellipsis;
+        }
+
+        & > .spacer {
+          flex-grow: 1;
+          flex-shrink: 1;
         }
 
         & > button {
           all: unset;
           cursor: pointer;
-
-          & > svg {
-            width: 0.8rem;
-            height: 0.8rem;
-          }
+          aspect-ratio: 1;
+          width: 1rem;
+          height: 1rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
       }
 
