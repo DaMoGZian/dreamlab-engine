@@ -1,13 +1,13 @@
-import { Context, Router, Status } from "../../deps/oak.ts";
-import { ClientPacketSchema } from "@dreamlab/proto/play.ts";
 import { DEFAULT_CODEC } from "@dreamlab/proto/codecs/mod.ts";
+import { ClientPacketSchema } from "@dreamlab/proto/play.ts";
+import { Context, Router, Status } from "../../deps/oak.ts";
 
-import { GameSession } from "../../session.ts";
-import { bootPlaySession, GameInstance } from "../../instance.ts";
-import { JsonAPIError } from "../util/api.ts";
 import { generateCUID } from "@dreamlab/vendor/cuid.ts";
-import { importSecretKey, validateAuthToken } from "../../util/game-auth.ts";
 import { CONFIG } from "../../config.ts";
+import { bootPlaySession, GameInstance } from "../../instance.ts";
+import { GameSession } from "../../session.ts";
+import { importSecretKey, validateAuthToken } from "../../util/game-auth.ts";
+import { JsonAPIError } from "../util/api.ts";
 
 const handleConnection = (
   socket: WebSocket,
@@ -105,7 +105,13 @@ export const servePlayRoutes = async (router: Router) => {
         "No instance with the given ID exists.",
       );
 
-    // TODO: potentially race a sleep 10_000ms and a instance.waitForSessionBoot
+    const usePlaySession =
+      ctx.request.url.searchParams.get("play_session") && instance.info.editMode;
+
+    await Promise.race([
+      new Promise(res => setTimeout(res, 5_000)),
+      usePlaySession ? instance.waitForPlaySessionBoot() : instance.waitForSessionBoot(),
+    ]);
 
     let session = instance.session;
     if (session === undefined)
@@ -114,7 +120,7 @@ export const servePlayRoutes = async (router: Router) => {
         "The instance with the given ID is not running a session.",
       );
 
-    if (ctx.request.url.searchParams.get("play_session") && instance.info.editMode) {
+    if (usePlaySession) {
       if (!instance.playSession) await bootPlaySession(instance);
 
       session = instance.playSession;
