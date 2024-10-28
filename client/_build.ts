@@ -1,4 +1,3 @@
-import * as dotenv from "jsr:@std/dotenv@0.225.2";
 import {
   bundleClient,
   bundleEngine,
@@ -7,8 +6,6 @@ import {
 } from "../build-system/mod.ts";
 
 if (import.meta.main) {
-  dotenv.load({ envPath: "./.env.local", export: true });
-
   const watch = Deno.args.includes("--watch");
   const clean = Deno.args.includes("--clean");
 

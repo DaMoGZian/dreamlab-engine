@@ -159,7 +159,7 @@ export const unwasmRapierPlugin = (): esbuild.Plugin => ({
 });
 
 export const dreamlabEnvironmentPlugin = (
-  files: string[] = [".env", ".env.local"],
+  files: string[] = [".env", ".env.production", ".env.local"],
 ): esbuild.Plugin => ({
   name: "dreamlab-environment",
   setup: build => {

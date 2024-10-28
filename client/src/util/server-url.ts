@@ -14,9 +14,8 @@ export function setConnectionDetails(details: ServerConnectionDetails) {
 const useDefaultDetails = () => {
   const searchParams = new URLSearchParams(window.location.search);
 
-  const server: string | null = import.meta.env.IS_DEV
-    ? import.meta.env.SERVER_URL
-    : searchParams.get("server");
+  // always prefer search param, fallback to SERVER_URL if set
+  const server = searchParams.get("server") ?? import.meta.env.SERVER_URL ?? null;
   if (server) {
     const serverUrl = new URL(server);
     serverUrl.protocol = serverUrl.protocol === "wss:" ? "https:" : "http:";
