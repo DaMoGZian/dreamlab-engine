@@ -23,7 +23,7 @@
         width: 60%;
         justify-content: center;
 
-        & div[role="button"] {
+        div[role="button"] {
           width: 1.375em;
           height: 1.375em;
           padding: 0.125rem;
@@ -47,7 +47,7 @@
           }
         }
 
-        & input[type="search"] {
+        input[type="search"] {
           appearance: none;
           all: unset;
           font-family: var(--font-mono);
@@ -63,7 +63,7 @@
       }
     }
 
-    & h1,
+    h1,
     p {
       margin: 0;
     }
@@ -94,7 +94,7 @@
       gap: 0.25rem;
     }
 
-    & svg {
+    svg {
       width: 1.25rem;
       height: 1.25rem;
     }

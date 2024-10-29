@@ -23,7 +23,7 @@ dreamlab-connect-form {
   margin: 0 auto;
   padding: 1em;
 
-  & section {
+  section {
     display: flex;
     flex-direction: column;
     margin-top: 1em;

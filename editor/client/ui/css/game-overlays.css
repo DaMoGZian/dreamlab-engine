@@ -32,7 +32,7 @@
     font-weight: 600;
   }
 
-  & svg {
+  svg {
     width: 1em;
     height: 1em;
   }
@@ -50,7 +50,7 @@
   & > * {
     pointer-events: all;
 
-    & dreamlab-icon-button[data-active] {
+    dreamlab-icon-button[data-active] {
       --color: rgb(var(--color-accent) / 1);
       --color-hover: rgb(var(--color-accent) / 1);
       --color-active: rgb(var(--color-accent) / 1);

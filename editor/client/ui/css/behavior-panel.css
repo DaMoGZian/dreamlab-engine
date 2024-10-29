@@ -44,7 +44,7 @@
     margin-left: auto;
     transition: color 0.2s ease;
 
-    & svg {
+    svg {
       height: 1.5em;
       width: 1.5em;
     }
@@ -67,7 +67,7 @@
     max-height: 0;
     overflow-y: clip;
 
-    & td button {
+    td button {
       width: 100%;
     }
   }

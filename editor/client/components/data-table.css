@@ -6,8 +6,8 @@ dreamlab-data-table {
     width: 100%;
     border-spacing: 2px;
 
-    & th,
-    & td {
+    th,
+    td {
       --padding: 0.5em;
       background-color: rgb(var(--color-bg-2) / 1);
       border-radius: var(--border-radius);
@@ -19,7 +19,7 @@ dreamlab-data-table {
         padding: 0;
       }
 
-      & input[type="text"] {
+      input[type="text"] {
         all: unset;
         appearance: none;
         width: 100%;
@@ -75,13 +75,13 @@ dreamlab-data-table {
         }
       }
 
-      & code {
+      code {
         cursor: pointer;
         user-select: all;
       }
 
-      & code,
-      & input[type="text"] {
+      code,
+      input[type="text"] {
         font-family: var(--font-mono);
         font-weight: 600;
       }
@@ -95,11 +95,11 @@ dreamlab-data-table {
       background-color: rgb(var(--color-bg-danger) / 1);
     }
 
-    & th {
+    th {
       text-align: end;
     }
 
-    & td {
+    td {
       text-align: start;
     }
   }

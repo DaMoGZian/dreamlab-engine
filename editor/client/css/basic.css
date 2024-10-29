@@ -10,19 +10,19 @@ body > main > div {
 
 /* apply styles to everything except the game container, so we don't clobber game UI styles */
 :where(body > main :not(#game-container)) {
-  & h1,
-  & h2,
-  & h3 {
+  h1,
+  h2,
+  h3 {
     all: unset;
     display: block;
     margin-bottom: 0.5em;
   }
 
-  & h1 {
+  h1 {
     font-weight: 600;
   }
 
-  & section {
+  section {
     padding: 0.5em;
     border-radius: var(--border-radius);
     background-color: rgb(var(--color-bg-1) / 1);

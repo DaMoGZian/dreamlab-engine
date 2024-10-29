@@ -8,7 +8,7 @@
     user-select: none;
     height: 100%;
 
-    & summary {
+    summary {
       display: flex;
       align-items: center;
       font-size: 0.875rem;

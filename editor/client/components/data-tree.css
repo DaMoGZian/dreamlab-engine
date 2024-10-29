@@ -1,28 +1,28 @@
 dreamlab-data-tree {
   --tree-indent-amount: 1em;
 
-  & details {
+  details {
     padding-left: var(--tree-indent-amount);
     margin-top: 0.125em;
   }
 
-  & details:not(.directory)[data-selected] > summary {
+  details:not(.directory)[data-selected] > summary {
     background-color: rgb(var(--color-primary) / 1);
   }
 
-  & details:not(.directory)[data-selected] > summary:hover {
+  details:not(.directory)[data-selected] > summary:hover {
     background-color: rgb(var(--color-primary) / 0.85);
   }
 
-  & details.directory[data-selected] > summary {
+  details.directory[data-selected] > summary {
     background-color: rgb(var(--color-bg-2) / 0.5);
   }
 
-  & details.directory[data-selected] > summary:hover {
+  details.directory[data-selected] > summary:hover {
     background-color: rgb(var(--color-bg-2) / 0.7);
   }
 
-  & details > summary {
+  details > summary {
     margin-left: calc(var(--tree-indent-amount) * -1);
     position: relative;
     border-radius: var(--border-radius);
@@ -68,19 +68,19 @@ dreamlab-data-tree {
     }
   }
 
-  & details[open] {
+  details[open] {
     & > summary > div.arrow > svg {
       transform: rotate(0deg);
     }
   }
 
-  & details.directory {
+  details.directory {
     & > summary > div.arrow {
       display: flex;
     }
   }
 
-  & details:not(.directory) {
+  details:not(.directory) {
     & > summary > div.arrow {
       display: none;
     }
