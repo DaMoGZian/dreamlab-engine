@@ -416,9 +416,6 @@ export class SceneGraph implements InspectorUIWidget {
           const newEntity = entity.spawn({
             type: Facades.lookupFacadeEntityType(type),
             name: type.name,
-            transform: {
-              position: this.game.local._.Camera.globalTransform.position,
-            },
           });
 
           UndoRedoManager._.push({
