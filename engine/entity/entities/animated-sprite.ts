@@ -1,6 +1,6 @@
 import * as PIXI from "@dreamlab/vendor/pixi.ts";
 import { IVector2, Vector2 } from "../../math/mod.ts";
-import { GameRender } from "../../signals/mod.ts";
+import { EntityTransformUpdate, GameRender } from "../../signals/mod.ts";
 import { SpritesheetAdapter } from "../../value/adapters/texture-adapter.ts";
 import { Entity, EntityContext } from "../entity.ts";
 import { PixiEntity } from "../pixi-entity.ts";
@@ -35,16 +35,27 @@ export class AnimatedSprite extends PixiEntity {
     this.defineValue(AnimatedSprite, "spritesheet", { type: SpritesheetAdapter });
 
     if (this.game.isClient() && this.spritesheet !== "") {
-      PIXI.Assets.backgroundLoad(this.game.resolveResource(this.spritesheet));
+      // PIXI.Assets.backgroundLoad(this.game.resolveResource(this.spritesheet));
     }
 
-    this.listen(this.game, GameRender, () => {
+    const updateSize = () => {
       if (!this.#sprite) return;
-
+      this.#sprite.scale.set(0);
       this.#sprite.width = this.width * this.globalTransform.scale.x;
       this.#sprite.height = this.height * this.globalTransform.scale.y;
-      this.#sprite.alpha = this.alpha;
+    };
+
+    this.on(EntityTransformUpdate, updateSize);
+    this.listen(this.game, GameRender, () => {
+      if (!this.#sprite || !this.game.isClient()) return;
+      this.#sprite.update(this.game.renderer.app.ticker);
+      updateSize();
     });
+
+    const widthValue = this.values.get("width");
+    const heightValue = this.values.get("height");
+    widthValue?.onChanged(updateSize);
+    heightValue?.onChanged(updateSize);
 
     const spritesheetValue = this.values.get("spritesheet");
     spritesheetValue?.onChanged(() => {
@@ -54,6 +65,12 @@ export class AnimatedSprite extends PixiEntity {
         sprite.textures = textures;
         sprite.play();
       });
+    });
+
+    const alphaValue = this.values.get("alpha");
+    alphaValue?.onChanged(() => {
+      if (!this.#sprite) return;
+      this.#sprite.alpha = this.alpha;
     });
   }
 
@@ -73,12 +90,14 @@ export class AnimatedSprite extends PixiEntity {
     if (!this.container) return;
 
     const textures = await this.#getTextures();
-    this.#sprite = new PIXI.AnimatedSprite(textures);
-
-    this.#sprite.width = this.width * this.globalTransform.scale.x;
-    this.#sprite.height = this.height * this.globalTransform.scale.y;
-    this.#sprite.anchor.set(0.5);
-    this.#sprite.alpha = this.alpha;
+    this.#sprite = new PIXI.AnimatedSprite({
+      autoUpdate: false,
+      textures,
+      width: this.width * this.globalTransform.scale.x,
+      height: this.height * this.globalTransform.scale.y,
+      anchor: 0.5,
+      alpha: this.alpha,
+    });
     this.#sprite.animationSpeed = this.speed;
     this.#sprite.loop = this.loop;
     this.#sprite.play();
