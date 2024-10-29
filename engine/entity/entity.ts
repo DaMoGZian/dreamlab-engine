@@ -858,8 +858,6 @@ export abstract class Entity implements ISignalHandler {
   onInitialize(): void {}
 
   [internal.submitEntityTickingOrder](entities: Entity[]) {
-    if (!this.enabled) return;
-
     entities.push(this);
     for (const child of this.#children.values()) {
       child[internal.submitEntityTickingOrder](entities);
@@ -867,6 +865,7 @@ export abstract class Entity implements ISignalHandler {
   }
 
   onUpdate() {
+    if (!this.enabled) return;
     const behaviorCount = this.behaviors.length;
     for (let i = 0; i < behaviorCount; i++) {
       const behavior = this.behaviors[i];
