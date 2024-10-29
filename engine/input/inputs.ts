@@ -52,6 +52,7 @@ export class Inputs extends BasicSignalHandler<Inputs> {
     return Object.freeze(
       this.#actions
         .values()
+        // @ts-ignore This breaks in typedef-gen. something wrong with shim?
         .map(action => [action, action.binding] as const)
         .toArray(),
     );

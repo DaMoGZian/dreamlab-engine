@@ -350,7 +350,7 @@ export abstract class Entity implements ISignalHandler {
   [internal.entitySpawnFinalize]() {
     for (const behavior of this.behaviors) {
       behavior.setup();
-      behavior[internal.implicitSetup]()
+      behavior[internal.implicitSetup]();
     }
     this.#spawn();
     for (const child of this.children.values()) child[internal.entitySpawnFinalize]();
@@ -457,6 +457,7 @@ export abstract class Entity implements ISignalHandler {
         ? undefined
         : this.children
             .values()
+            // @ts-ignore This breaks in typedef-gen. something wrong with shim?
             .map(entity => entity.#generateRichDefinition(withRefs))
             .toArray();
 
