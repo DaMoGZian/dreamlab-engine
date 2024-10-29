@@ -23,10 +23,11 @@ const InstanceInfoSchema = z.object({
   started_at: z.number().optional(),
   rich_status: z.any().optional(),
 });
+type InstanceInfo = z.infer<typeof InstanceInfoSchema>;
+const APIInstancesSchema = z.record(InstanceInfoSchema);
+type APIInstancesResponse = z.infer<typeof APIInstancesSchema>;
 
-export const createInstancePicker = async (worldId: string) => {
-  const APIInstancesSchema = z.record(InstanceInfoSchema);
-
+export const fetchInstances = async (worldId: string): Promise<APIInstancesResponse> => {
   const url = urlWithParams(new URL("/api/v1/instances", import.meta.env.SERVER_URL), {
     world: worldId,
   });
@@ -34,7 +35,26 @@ export const createInstancePicker = async (worldId: string) => {
     .then(r => r.json())
     .then(APIInstancesSchema.parse);
 
+  return instances;
+};
+
+export const spawnNewInstance = async (worldId: string): Promise<InstanceInfo> => {
+  return await fetch(new URL("/api/v1/start-play-world", import.meta.env.SERVER_URL), {
+    method: "POST",
+    body: JSON.stringify({ world_id: worldId }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(r => r.json())
+    .then(InstanceInfoSchema.parse);
+};
+
+export const createInstancePicker = (instances: APIInstancesResponse) => {
   const instanceListings: HTMLElement[] = [];
+
+  // TODO: periodic refresh of instance listings
+
   for (const instance of Object.values(instances)) {
     const instanceListing = elem("article", {}, [
       elem("span", {}, [
@@ -54,7 +74,10 @@ export const createInstancePicker = async (worldId: string) => {
   return elem("section", { className: "instances" }, instanceListings);
 };
 
-export const createConnectForm = async (worldId: string): Promise<DreamlabConnectForm> => {
+export const createConnectForm = (
+  worldId: string,
+  instances: APIInstancesResponse,
+): DreamlabConnectForm => {
   const nicknameInput = elem(
     "input",
     {
@@ -68,7 +91,7 @@ export const createConnectForm = async (worldId: string): Promise<DreamlabConnec
     },
     [],
   );
-  const instancePicker = await createInstancePicker(worldId);
+  const instancePicker = createInstancePicker(instances);
 
   const savedNickname = window.localStorage.getItem("dreamlab/nickname");
   if (savedNickname) {
@@ -81,7 +104,9 @@ export const createConnectForm = async (worldId: string): Promise<DreamlabConnec
       nicknameInput,
     ]),
     instancePicker,
-    elem("section", {}, [elem("button", { className: "green" }, ["New Instance"])]),
+    elem("section", {}, [
+      elem("button", { id: "new-instance", className: "green" }, ["New Instance"]),
+    ]),
   ]);
 
   const onConnect = Promise.withResolvers<ConnectDetails>();
@@ -109,18 +134,7 @@ export const createConnectForm = async (worldId: string): Promise<DreamlabConnec
           instanceId: instance,
         });
       } else {
-        const instancePromise = fetch(
-          new URL("/api/v1/start-play-world", import.meta.env.SERVER_URL),
-          {
-            method: "POST",
-            body: JSON.stringify({ world_id: worldId }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        )
-          .then(r => r.json())
-          .then(InstanceInfoSchema.parse);
+        const instancePromise = spawnNewInstance(worldId);
 
         instancePromise.then(instance => {
           connectForm.remove();

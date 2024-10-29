@@ -8,12 +8,14 @@ import "./_env.ts";
 import { DEFAULT_CODEC } from "@dreamlab/proto/codecs/mod.ts";
 import { urlToHTTP, urlToWebSocket } from "@dreamlab/util/url.ts";
 import { generateCUID } from "@dreamlab/vendor/cuid.ts";
-import { createConnectForm } from "./connect-form.ts";
+import { createConnectForm, fetchInstances, spawnNewInstance } from "./connect-form.ts";
 import { connectToGame } from "./game-connection.ts";
 import { setupGame } from "./game-setup.ts";
 import { connectionDetails, setConnectionDetails } from "./util/server-url.ts";
 
-let nickname = "Player" + Math.floor(Math.random() * 999) + 1;
+let nickname =
+  window.localStorage.getItem("dreamlab/nickname") ??
+  "Player" + Math.floor(Math.random() * 999) + 1;
 
 if (connectionDetails.instanceId === "") {
   const searchParams = new URLSearchParams(window.location.search);
@@ -23,11 +25,24 @@ if (connectionDetails.instanceId === "") {
     throw new Error();
   }
 
-  const connectForm = await createConnectForm(worldId);
-  document.body.prepend(connectForm.form);
-  const { serverUrl, instanceId, nickname: nickname_ } = await connectForm.onConnect;
-  setConnectionDetails({ instanceId, serverUrl: urlToHTTP(serverUrl).toString() });
-  nickname = nickname_;
+  const instances = await fetchInstances(worldId);
+  const connectForm = createConnectForm(worldId, instances);
+  const instanceCount = Object.values(instances).length;
+  if (instanceCount === 0) {
+    const instance = await spawnNewInstance(worldId);
+    setConnectionDetails({ instanceId: instance.id, serverUrl: instance.server });
+  } else if (
+    instanceCount === 1 ||
+    new URLSearchParams(window.location.search).has("autojoin")
+  ) {
+    const instance = Object.values(instances)[0];
+    setConnectionDetails({ instanceId: instance.id, serverUrl: instance.server });
+  } else {
+    document.body.prepend(connectForm.form);
+    const { serverUrl, instanceId, nickname: nickname_ } = await connectForm.onConnect;
+    setConnectionDetails({ instanceId, serverUrl: urlToHTTP(serverUrl).toString() });
+    nickname = nickname_;
+  }
 }
 
 const connectUrl = urlToWebSocket(connectionDetails.serverUrl);
