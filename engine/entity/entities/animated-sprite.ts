@@ -22,16 +22,20 @@ export class AnimatedSprite extends PixiEntity {
   alpha: number = 1;
   speed: number = 0.1;
   loop: boolean = true;
+  startFrame: number = 0;
+  endFrame: number = 0;
 
   #sprite: PIXI.AnimatedSprite | undefined;
   get sprite(): PIXI.AnimatedSprite | undefined {
     return this.#sprite;
   }
 
+  #originalTextures: PIXI.Texture[] | undefined;
+
   constructor(ctx: EntityContext) {
     super(ctx);
 
-    this.defineValues(AnimatedSprite, "width", "height", "alpha", "speed", "loop");
+    this.defineValues(AnimatedSprite, "width", "height", "alpha", "speed", "loop", "startFrame", "endFrame");
     this.defineValue(AnimatedSprite, "spritesheet", { type: SpritesheetAdapter });
 
     if (this.game.isClient() && this.spritesheet !== "") {
@@ -59,11 +63,8 @@ export class AnimatedSprite extends PixiEntity {
 
     const spritesheetValue = this.values.get("spritesheet");
     spritesheetValue?.onChanged(() => {
-      const sprite = this.#sprite;
-      if (!sprite) return;
-      void this.#getTextures().then(textures => {
-        sprite.textures = textures;
-        sprite.play();
+      void this.#getTextures().then(() => {
+        this.#updateTextures();
       });
     });
 
@@ -72,27 +73,52 @@ export class AnimatedSprite extends PixiEntity {
       if (!this.#sprite) return;
       this.#sprite.alpha = this.alpha;
     });
+
+    const startFrameValue = this.values.get("startFrame");
+    const endFrameValue = this.values.get("endFrame");
+    startFrameValue?.onChanged(this.#updateTextures.bind(this));
+    endFrameValue?.onChanged(this.#updateTextures.bind(this));
   }
 
-  async #getTextures(): Promise<PIXI.Texture[]> {
-    if (this.spritesheet === "") return [PIXI.Texture.WHITE];
+  async #getTextures(): Promise<void> {
+    if (this.spritesheet === "") {
+      this.#originalTextures = [PIXI.Texture.WHITE];
+      return;
+    }
 
     const spritesheet = await PIXI.Assets.load(this.game.resolveResource(this.spritesheet));
     if (!(spritesheet instanceof PIXI.Spritesheet)) {
-      throw new TypeError("texture is not a pixi sritesheet");
+      throw new TypeError("texture is not a pixi spritesheet");
     }
+    spritesheet.textureSource.scaleMode = "nearest";
 
-    return Object.values(spritesheet.textures);
+    this.#originalTextures = Object.values(spritesheet.textures);
+  }
+
+  #getCurrentTextures(): PIXI.Texture[] {
+    if (!this.#originalTextures) return [PIXI.Texture.WHITE];
+    const totalFrames = this.#originalTextures.length;
+    const start = Math.max(0, Math.min(this.startFrame, totalFrames - 1));
+    const end = Math.max(start, Math.min(this.endFrame, totalFrames - 1));
+    return this.#originalTextures.slice(start, end + 1);
+  }
+
+  #updateTextures() {
+    if (!this.#sprite || !this.#originalTextures) return;
+    this.#sprite.textures = this.#getCurrentTextures();
+    this.#sprite.play();
   }
 
   async onInitialize() {
     super.onInitialize();
     if (!this.container) return;
 
-    const textures = await this.#getTextures();
+    await this.#getTextures();
+    if (!this.#originalTextures) return;
+
     this.#sprite = new PIXI.AnimatedSprite({
       autoUpdate: false,
-      textures,
+      textures: this.#getCurrentTextures(),
       width: this.width * this.globalTransform.scale.x,
       height: this.height * this.globalTransform.scale.y,
       anchor: 0.5,
