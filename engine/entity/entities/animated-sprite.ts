@@ -83,6 +83,11 @@ export class AnimatedSprite extends PixiEntity {
       this.#sprite.alpha = this.alpha;
     });
 
+    this.values.get("speed")?.onChanged(() => {
+      if (!this.#sprite) return;
+      this.#sprite.animationSpeed = this.speed;
+    })
+
     const startFrameValue = this.values.get("startFrame");
     const endFrameValue = this.values.get("endFrame");
     startFrameValue?.onChanged(this.#updateTextures.bind(this));
