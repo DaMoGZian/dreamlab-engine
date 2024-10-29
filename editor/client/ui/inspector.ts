@@ -10,6 +10,7 @@ import { setupKeyboardShortcuts } from "./keyboard-shortcuts.ts";
 import { Properties } from "./properties.ts";
 import { SceneGraph } from "./scene-graph.ts";
 import { SelectedEntityService } from "./selected-entity.ts";
+import { WelcomeMenu } from "./welcome-menu.ts";
 
 export interface InspectorUIWidget {
   setup(ui: InspectorUI): void;
@@ -27,6 +28,7 @@ export class InspectorUI {
   contextMenu: ContextMenu;
   gameOverlays: GameOverlays;
   fileTree: FileTree;
+  welcomeMenu: WelcomeMenu;
 
   constructor(
     public game: ClientGame,
@@ -43,6 +45,7 @@ export class InspectorUI {
     this.contextMenu = new ContextMenu(game);
     this.gameOverlays = new GameOverlays(game, gameContainer);
     this.fileTree = new FileTree(game);
+    this.welcomeMenu = new WelcomeMenu();
 
     if (editMode) {
       game.local._.Camera.getBehavior(CameraPanBehavior).ui = this;
@@ -85,6 +88,7 @@ export class InspectorUI {
     this.contextMenu.show(uiRoot);
     this.gameOverlays.show(uiRoot);
     this.fileTree.show(uiRoot);
+    this.welcomeMenu.show(uiRoot, this.game.worldId);
   }
 
   hide() {
@@ -94,5 +98,6 @@ export class InspectorUI {
     this.contextMenu.hide();
     this.gameOverlays.hide();
     this.fileTree.hide();
+    this.welcomeMenu.hide();
   }
 }
