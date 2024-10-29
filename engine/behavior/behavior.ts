@@ -65,7 +65,11 @@ type BehaviorValueOpts<B extends Behavior, P extends BehaviorValueProp<B>> = {
 };
 
 // TODO: Fix adapterType type. Can't quite get it to work in browser editor.
+// TODO: Add ability to pass EntityValueOpts
 // export function syncedValue(adapterType?: ValueTypeAdapter<any>) {
+/**
+ * Makes the following class property visible in the inspector and synced over the network.
+ */
 export function syncedValue(adapterType?: any) {
   return function (target: any, propertyKey: string) {
     if (!target.constructor[internal.defineValuesProperties]) {
