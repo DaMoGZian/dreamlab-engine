@@ -23,7 +23,7 @@ export class AnimatedSprite extends PixiEntity {
   speed: number = 0.1;
   loop: boolean = true;
   startFrame: number = 0;
-  endFrame: number = 0;
+  endFrame: number = -1;
 
   #sprite: PIXI.AnimatedSprite | undefined;
   get sprite(): PIXI.AnimatedSprite | undefined {
@@ -35,7 +35,16 @@ export class AnimatedSprite extends PixiEntity {
   constructor(ctx: EntityContext) {
     super(ctx);
 
-    this.defineValues(AnimatedSprite, "width", "height", "alpha", "speed", "loop", "startFrame", "endFrame");
+    this.defineValues(
+      AnimatedSprite,
+      "width",
+      "height",
+      "alpha",
+      "speed",
+      "loop",
+      "startFrame",
+      "endFrame",
+    );
     this.defineValue(AnimatedSprite, "spritesheet", { type: SpritesheetAdapter });
 
     if (this.game.isClient() && this.spritesheet !== "") {
@@ -99,7 +108,10 @@ export class AnimatedSprite extends PixiEntity {
     if (!this.#originalTextures) return [PIXI.Texture.WHITE];
     const totalFrames = this.#originalTextures.length;
     const start = Math.max(0, Math.min(this.startFrame, totalFrames - 1));
-    const end = Math.max(start, Math.min(this.endFrame, totalFrames - 1));
+    let end = Math.max(start, Math.min(this.endFrame, totalFrames - 1));
+    if (this.endFrame === -1) {
+      end = totalFrames - 1;
+    }
     return this.#originalTextures.slice(start, end + 1);
   }
 
