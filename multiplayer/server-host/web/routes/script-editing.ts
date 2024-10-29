@@ -232,6 +232,12 @@ export const serveScriptEditingAPI = (router: Router) => {
 
         await Deno.remove(computedPath, { recursive: true });
 
+        instance.session?.broadcastPacket({
+          t: "ScriptEdited",
+          script_location: relativePath,
+          behavior_script_id: undefined
+        });
+
         return { success: true };
       },
     ),
