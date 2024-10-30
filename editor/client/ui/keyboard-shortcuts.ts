@@ -154,6 +154,15 @@ export function setupKeyboardShortcuts(
       return;
     }
 
+    // Enable/disable
+    if (event.key === "e" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      for (const e of selectedService.entities) {
+        e.enabled = !e.enabled;
+      }
+      return;
+    }
+
     // Copy
     if (event.key === "c" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
@@ -257,7 +266,7 @@ export function setupKeyboardShortcuts(
       return;
     }
 
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       selectedService.entities = [];
     }
   });
