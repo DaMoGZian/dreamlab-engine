@@ -1,10 +1,10 @@
 import * as PIXI from "@dreamlab/vendor/pixi.ts";
+import { AbstractRenderer } from "@dreamlab/vendor/pixi.ts";
 import { IVector2, Vector2 } from "../../math/mod.ts";
 import { EntityTransformUpdate, GameRender } from "../../signals/mod.ts";
 import { SpritesheetAdapter } from "../../value/adapters/texture-adapter.ts";
 import { Entity, EntityContext } from "../entity.ts";
 import { PixiEntity } from "../pixi-entity.ts";
-import { AbstractRenderer } from "@dreamlab/vendor/pixi.ts";
 
 // this shockingly fixes spritesheet bleeding
 AbstractRenderer.defaultOptions.roundPixels = true;
@@ -65,7 +65,9 @@ export class AnimatedSprite extends PixiEntity {
     this.on(EntityTransformUpdate, updateSize);
     this.listen(this.game, GameRender, () => {
       if (!this.#sprite || !this.game.isClient()) return;
-      this.#sprite.update(this.game.renderer.app.ticker);
+      if (this.enabled && !this.game.paused.value) {
+        this.#sprite.update(this.game.renderer.app.ticker);
+      }
       updateSize();
     });
 
