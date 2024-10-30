@@ -4,6 +4,10 @@ import { EntityTransformUpdate, GameRender } from "../../signals/mod.ts";
 import { SpritesheetAdapter } from "../../value/adapters/texture-adapter.ts";
 import { Entity, EntityContext } from "../entity.ts";
 import { PixiEntity } from "../pixi-entity.ts";
+import { AbstractRenderer } from "@dreamlab/vendor/pixi.ts";
+
+// this shockingly fixes spritesheet bleeding
+AbstractRenderer.defaultOptions.roundPixels = true;
 
 export class AnimatedSprite extends PixiEntity {
   static {
@@ -86,7 +90,7 @@ export class AnimatedSprite extends PixiEntity {
     this.values.get("speed")?.onChanged(() => {
       if (!this.#sprite) return;
       this.#sprite.animationSpeed = this.speed;
-    })
+    });
 
     const startFrameValue = this.values.get("startFrame");
     const endFrameValue = this.values.get("endFrame");
