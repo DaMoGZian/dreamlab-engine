@@ -289,17 +289,57 @@ export function createValueControl(
       const opts = _opts as ValueControlOptions<string | undefined>;
 
       const picker = elem("hex-alpha-color-picker");
+      picker.style.width = "150px";
+      picker.style.height = "150px";
+
+      const inputContainer = elem("div", { className: "color-input-container" });
+      const hashLabel = elem("span", { className: "color-hash-label" }, ["#"]);
+
+      const input = elem("input", {
+        type: "text",
+        className: "color-input",
+        placeholder: "e.g., FF0000",
+      });
+
+      inputContainer.append(hashLabel, input);
+
+      const container = elem("div", { className: "color-picker-container" }, [
+        picker,
+        inputContainer,
+      ]);
+
       picker.addEventListener("color-changed", () => {
-        opts.set(picker.color);
+        const color = picker.color;
+        opts.set(color);
+        input.value = color.slice(1);
+      });
+
+      input.addEventListener("input", () => {
+        const value = input.value;
+        const fullValue = "#" + value;
+
+        if (/^([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(value)) {
+          picker.color = fullValue;
+          opts.set(fullValue);
+          input.classList.remove("invalid");
+        } else {
+          input.classList.add("invalid");
+        }
       });
 
       const refresh = () => {
-        const color = new PIXI.Color(opts.get() ?? opts.default ?? "#ffffffff");
-        picker.color = color.toHexa();
+        const colorValue = opts.get() ?? opts.default ?? "#ffffffff";
+        const color = new PIXI.Color(colorValue);
+        const hexa = color.toHexa();
+        picker.color = hexa;
+
+        if (document.activeElement !== input) {
+          input.value = hexa.slice(1);
+        }
       };
 
       refresh();
-      return [picker, refresh];
+      return [container, refresh];
     }
 
     case EntityByRefAdapter: {
