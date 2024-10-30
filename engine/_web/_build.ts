@@ -1,9 +1,21 @@
-import * as esbuild from "npm:esbuild@0.20.2";
-import { denoPlugins } from "jsr:@luca/esbuild-deno-loader";
+import { denoPlugins } from "jsr:@luca/esbuild-deno-loader@0.11.0";
+import * as esbuild from "npm:esbuild@0.24.0";
 import * as _throwaway from "./main.ts";
 
 const opts: esbuild.BuildOptions = {
   plugins: [
+    {
+      name: "dreamlab-node-shim",
+      setup: build => {
+        build.onResolve({ filter: /.*/, namespace: "node" }, args => {
+          if (args.path === "buffer") {
+            return { path: "//esm.sh/buffer@6.0.3", namespace: "https" };
+          }
+
+          return undefined;
+        });
+      },
+    },
     ...denoPlugins({
       loader: "native",
       configPath: await Deno.realPath("./deno.json"),

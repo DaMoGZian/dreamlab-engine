@@ -1,5 +1,5 @@
 import { generateCUID } from "@dreamlab/vendor/cuid.ts";
-import { Camera, ClientGame, GameStatus, Vector2 } from "../mod.ts";
+import { Camera, ClientGame, GameStatus, Text, Vector2 } from "../mod.ts";
 
 // #region Setup
 // @ts-expect-error global
@@ -33,6 +33,8 @@ const game = new ClientGame({
   container,
 });
 
+Text.FONT_SOURCE = "Iosevka.fnt";
+
 await game.initialize();
 const camera = game.local.spawn({
   type: Camera,
@@ -48,7 +50,7 @@ declare global {
 Object.assign(window, { game, camera, Vector2 });
 // #endregion
 
-const mod = await import("./test-cases/audio.ts");
+const mod = await import("./test-cases/text.ts");
 Object.assign(window, { ...mod });
 
 game.setStatus(GameStatus.Running);

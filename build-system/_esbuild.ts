@@ -189,3 +189,16 @@ export const dreamlabEnvironmentPlugin = (
     });
   },
 });
+
+export const dreamlabNodeShimPlugin = (): esbuild.Plugin => ({
+  name: "dreamlab-node-shim",
+  setup: build => {
+    build.onResolve({ filter: /.*/, namespace: "node" }, args => {
+      if (args.path === "buffer") {
+        return { path: "//esm.sh/buffer@6.0.3", namespace: "https" };
+      }
+
+      return undefined;
+    });
+  },
+});
