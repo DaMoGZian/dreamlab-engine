@@ -1,8 +1,10 @@
 import * as PIXI from "@dreamlab/vendor/pixi.ts";
+import * as internal from "../internal.ts";
 import { SignalSubscription } from "../signal.ts";
 import {
   EntityDestroyed,
   EntityEnableChanged,
+  EntityOwnEnableChanged,
   EntityReparented,
   GameRender,
 } from "../signals/mod.ts";
@@ -87,6 +89,11 @@ export abstract class PixiEntity extends Entity {
 
     this.on(EntityDestroyed, () => {
       this.container?.destroy({ children: true });
+    });
+
+    this.on(EntityOwnEnableChanged, () => {
+      this[internal.interpolationStartTick]();
+      this[internal.interpolationStartFrame](0);
     });
   }
 
