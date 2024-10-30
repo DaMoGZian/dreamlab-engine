@@ -4,6 +4,7 @@ import {
   dreamlabCssPlugin,
   dreamlabEngineExternalPlugin,
   dreamlabEnvironmentPlugin,
+  dreamlabNodeShimPlugin,
   dreamlabTextImportPlugin,
   dreamlabUIExternalPlugin,
   dreamlabVendorExternalPlugin,
@@ -112,6 +113,7 @@ export const bundleEngine = async (
   const buildOpts: esbuild.BuildOptions = {
     ...BASE_BUILD_OPTIONS,
     plugins: [
+      dreamlabNodeShimPlugin(),
       dreamlabVendorExternalPlugin(),
       dreamlabEngineExternalPlugin(),
       ...denoPlugins({
@@ -173,6 +175,7 @@ export const bundleClient = async (
     ...BASE_BUILD_OPTIONS,
     plugins: [
       dreamlabCssPlugin(),
+      dreamlabNodeShimPlugin(),
       dreamlabTextImportPlugin(".svg"),
       dreamlabEnvironmentPlugin(envStack),
       dreamlabVendorExternalPlugin(),
