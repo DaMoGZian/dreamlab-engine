@@ -32,8 +32,6 @@ import { InspectorUI } from "./ui/inspector.ts";
 import { LogViewer } from "./ui/log-viewer.ts";
 import { UndoRedoManager } from "./undo-redo.ts";
 
-import axios from "npm:axios@1.7.7";
-
 // TODO: loading screen ?
 
 const connectUrl = urlToWebSocket(connectionDetails.serverUrl);
@@ -41,37 +39,37 @@ connectUrl.pathname = `/api/v1/connect/${connectionDetails.instanceId}`;
 connectUrl.searchParams.set("player_id", generateCUID("ply"));
 connectUrl.searchParams.set("nickname", "Player" + Math.floor(Math.random() * 999) + 1);
 
-
 // #region Handle dropping files to upload directly into /assets
-export async function createFile(fileName: string, content: any = "", no_restart = false) {
-  let contentType = 'application/octet-stream';
+export async function createFile(fileName: string, content: unknown = "", no_restart = false) {
+  let contentType = "application/octet-stream";
 
-  if (typeof content === 'string') {
-    contentType = 'text/plain';
+  if (typeof content === "string") {
+    contentType = "text/plain";
   } else if (content instanceof File || content instanceof Blob) {
-    contentType = content.type || 'application/octet-stream';
+    contentType = content.type || "application/octet-stream";
   }
 
-  await axios.put(
+  const url = new URL(
     `${connectionDetails.serverUrl}api/v1/edit/${connectionDetails.instanceId}/files/${fileName}`,
-    content,
-    {
-      params: { no_restart },
-      headers: {
-        "Content-Type": contentType,
-        Authorization: `Bearer `,
-      },
-    },
   );
+  url.searchParams.set("no_restart", no_restart.toString());
+
+  await fetch(url, {
+    method: "PUT",
+    headers: {
+      "content-type": contentType,
+      Authorization: `Bearer `,
+    },
+  });
 }
 
 // Add event listeners for drag-and-drop functionality
-document.addEventListener('dragover', (event) => {
+document.addEventListener("dragover", event => {
   event.preventDefault();
   // Optional: Add visual feedback for dragging over the page
 });
 
-document.addEventListener('drop', async (event) => {
+document.addEventListener("drop", async event => {
   event.preventDefault();
   const files = event.dataTransfer?.files;
 
@@ -88,9 +86,9 @@ document.addEventListener('drop', async (event) => {
 
     try {
       await Promise.all(uploadPromises);
-      console.log('All files have been uploaded successfully.');
+      console.log("All files have been uploaded successfully.");
     } catch (error) {
-      console.error('Error uploading files:', error);
+      console.error("Error uploading files:", error);
     }
   }
 });
