@@ -94,26 +94,46 @@ export function createValueControl(
     case TextureAdapter: {
       const opts = _opts as ValueControlOptions<string | undefined>;
 
-      const convert = async (value: string) => {
-        const url = z.literal("").or(z.string().url()).parse(value);
-        if (url === "") return url;
+      const container = elem("div", { className: "texture-control" });
+      const imgPreview = elem("img", { className: "texture-preview" });
+      imgPreview.style.display = "none";
+
+      const updateImagePreview = async (url: string) => {
+        if (!url) {
+          imgPreview.style.display = "none";
+          imgPreview.src = "";
+          return;
+        }
 
         try {
-          const texture = await PIXI.Assets.load(game.resolveResource(url));
-          if (!(texture instanceof PIXI.Texture)) throw new TypeError("not a texture");
+          const resolvedUrl = game.resolveResource(url);
+          const texture = await PIXI.Assets.load(resolvedUrl);
+          if (!(texture instanceof PIXI.Texture)) throw new TypeError("Not a texture");
 
-          return url;
+          imgPreview.src = resolvedUrl;
+          imgPreview.style.display = "block";
         } catch {
-          throw new Error("Texture URL could not be resolved");
+          imgPreview.style.display = "none";
+          imgPreview.src = "";
         }
       };
 
-      const [control, refresh] = createInputFieldWithDefault({
+      const [control, refreshInput] = createInputFieldWithDefault({
         default: opts.default,
         get: opts.get,
-        set: v => opts.set(v ?? ""),
-        convert,
+        set: async v => {
+          opts.set(v ?? "");
+          await updateImagePreview(v ?? "");
+        },
+        convert: async value => {
+          const url = z.literal("").or(z.string().url()).parse(value);
+          await updateImagePreview(url);
+          return url;
+        },
       });
+
+      updateImagePreview(opts.get() ?? "");
+      container.append(imgPreview, control);
 
       const getUrl = async (): Promise<string | undefined> => {
         const dragTarget = document.querySelector(
@@ -123,8 +143,8 @@ export function createValueControl(
 
         const file = `res://${dragTarget.dataset.file}`;
         try {
-          const url = await convert(file);
-          return url;
+          await updateImagePreview(file);
+          return file;
         } catch {
           return undefined;
         }
@@ -137,10 +157,18 @@ export function createValueControl(
 
       control.addEventListener("drop", async () => {
         const url = await getUrl();
-        if (url) opts.set(url);
+        if (url) {
+          opts.set(url);
+          await updateImagePreview(url);
+        }
       });
 
-      return [control, refresh];
+      const refresh = () => {
+        refreshInput();
+        updateImagePreview(opts.get() ?? "");
+      };
+
+      return [container, refresh];
     }
 
     case SpritesheetAdapter: {
