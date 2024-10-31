@@ -126,12 +126,17 @@ export class Text extends PixiEntity {
   }
 
   async #reflow() {
-    let font = Text.#fonts.get(this.font);
+    const fontName = this.font;
+    let font = Text.#fonts.get(fontName);
     if (!font) {
       font = loadFont(Text.FONT_SOURCE_DIR + `${this.font}.fnt`);
+      Text.#fonts.set(fontName, font);
     }
 
-    font = await font;
+    if (!("texture" in font)) {
+      font = await font;
+      Text.#fonts.set(fontName, font);
+    }
 
     if (!this.#shader) {
       const textColor = new PIXI.Color(this.color);
