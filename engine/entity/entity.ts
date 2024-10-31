@@ -309,6 +309,14 @@ export abstract class Entity implements ISignalHandler {
 
     if (def.enabled !== undefined) entity.enabled = def.enabled;
 
+    def.children?.forEach(c => {
+      try {
+        entity[internal.entitySpawn](c, opts);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
     if (def.behaviors) {
       def.behaviors.forEach(b => {
         const behavior: Behavior = new b.type({
@@ -326,14 +334,6 @@ export abstract class Entity implements ISignalHandler {
     }
 
     if (!opts.inert) entity.#spawn();
-
-    def.children?.forEach(c => {
-      try {
-        entity[internal.entitySpawn](c, opts);
-      } catch (err) {
-        console.error(err);
-      }
-    });
 
     return entity;
   }
