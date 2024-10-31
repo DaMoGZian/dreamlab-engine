@@ -116,13 +116,29 @@ export class BehaviorList {
         const script = this.game[internal.behaviorLoader].lookup(behaviorType);
         if (!script) continue;
         const values: SceneDescBehavior["values"] = {};
+        const newBehavior = { ref: behavior.ref, script, values };
+
         for (const [key, value] of behavior.values.entries()) {
+          const updateValue = () => {
+            values[key] = value.adapter
+              ? value.adapter.convertToPrimitive(value.value)
+              : (value.value as JsonValue);
+          };
+
+          value.onChanged(() => {
+            updateValue();
+            const existingEditor = this.editors.get(newBehavior.ref);
+            if (existingEditor) {
+              existingEditor.resolveUpdate(newBehavior);
+            }
+          });
+          updateValue();
+
           values[key] = value.adapter
             ? value.adapter.convertToPrimitive(value.value)
             : (value.value as JsonValue);
         }
 
-        const newBehavior = { ref: behavior.ref, script, values };
         this.addBehavior(newBehavior);
       }
 
