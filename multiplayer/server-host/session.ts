@@ -105,7 +105,11 @@ export class GameSession {
   broadcastPacket(packet: ServerPacket) {
     for (const connection of this.connections.values()) {
       const packetData = connection.codec.encodePacket(packet);
-      connection.socket.send(packetData);
+      try {
+        connection.socket.send(packetData);
+      } catch {
+        // ignore
+      }
     }
   }
 
@@ -113,7 +117,11 @@ export class GameSession {
     const connection = this.connections.get(to);
     if (connection === undefined) return;
     const packetData = connection.codec.encodePacket(packet);
-    connection.socket.send(packetData);
+    try {
+      connection.socket.send(packetData);
+    } catch {
+      // ignore
+    }
   }
 
   async ready() {
