@@ -318,14 +318,8 @@ export abstract class Entity implements ISignalHandler {
           values: b.values,
         });
         entity.behaviors.push(behavior);
-        if (!opts.inert) {
-          behavior.setup();
-          behavior[internal.implicitSetup]();
-        }
       });
     }
-
-    if (!opts.inert) entity.#spawn();
 
     def.children?.forEach(c => {
       try {
@@ -334,6 +328,15 @@ export abstract class Entity implements ISignalHandler {
         console.error(err);
       }
     });
+
+    if (!opts.inert) {
+      for (const behavior of entity.behaviors) {
+        behavior.setup();
+        behavior[internal.implicitSetup]();
+      }
+
+      entity.#spawn();
+    }
 
     return entity;
   }
