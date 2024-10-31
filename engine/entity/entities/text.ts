@@ -44,7 +44,6 @@ export class Text extends PixiEntity {
 
     this.defineValues(
       Text,
-      "font",
       "text",
       "size",
       "outlineSize",
@@ -53,6 +52,7 @@ export class Text extends PixiEntity {
       "letterSpacing",
     );
 
+    this.defineValue(Text, "font", { type: FontEnumAdapter });
     this.defineValue(Text, "color", { type: ColorAdapter });
     this.defineValue(Text, "align", { type: AlignEnumAdapter });
     this.defineValue(Text, "outlineColor", { type: ColorAdapter });
