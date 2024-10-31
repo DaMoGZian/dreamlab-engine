@@ -1,5 +1,4 @@
 import * as PIXI from "@dreamlab/vendor/pixi.ts";
-import { AbstractRenderer } from "@dreamlab/vendor/pixi.ts";
 import { IVector2, Vector2 } from "../../math/mod.ts";
 import { EntityTransformUpdate, GameRender } from "../../signals/mod.ts";
 import { SpritesheetAdapter } from "../../value/adapters/texture-adapter.ts";
