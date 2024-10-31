@@ -20,7 +20,7 @@ export class Text extends PixiEntity {
   static FONT_SOURCE = "";
   static #font: Font | Promise<Font> | undefined;
 
-  text: string = "";
+  text: string = "Sample Text";
   color: string = "white";
   size: number = 24;
   align: enumAdapter.Union<typeof AlignEnumAdapter> = "left";
