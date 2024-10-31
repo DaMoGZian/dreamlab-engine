@@ -292,48 +292,55 @@ export abstract class Entity implements ISignalHandler {
       console.warn(`${this.id} is very deeply nested!! You may run into issues.`);
   }
 
+  static #constructEntity<T extends Entity>(parent: Entity, def: EntityDefinition<T>) {
+    const entity = new def.type({
+      game: parent.game,
+      name: def.name,
+      parent,
+      transform: def.transform,
+      authority: def.authority ?? parent.authority,
+      ref: def._ref,
+      values: def.values ? Object.fromEntries(Object.entries(def.values)) : undefined,
+    });
+    if (def.enabled !== undefined) entity.enabled = def.enabled;
+    return entity;
+  }
+
   // deno-lint-ignore no-explicit-any
   [internal.entitySpawn]<T extends Entity, C extends any[], B extends any[]>(
     def: EntityDefinition<T, C, B>,
     opts: { inert?: boolean } = {},
   ) {
-    const entity = new def.type({
-      game: this.game,
-      name: def.name,
-      parent: this,
-      transform: def.transform,
-      authority: def.authority ?? this.authority,
-      ref: def._ref,
-      values: def.values ? Object.fromEntries(Object.entries(def.values)) : undefined,
-    });
+    const entity = Entity.#constructEntity(this, def);
+    const spawnOrder: { entity: Entity; def: EntityDefinition }[] = [{ entity, def }];
+    const addChild = (parent: Entity, childDef: EntityDefinition) => {
+      const child = Entity.#constructEntity(parent, childDef);
+      spawnOrder.push({ entity: child, def: childDef });
+      childDef.children?.forEach(it => addChild(child, it));
+    };
+    def.children?.forEach(it => addChild(entity, it));
 
-    if (def.enabled !== undefined) entity.enabled = def.enabled;
-
-    if (def.behaviors) {
-      def.behaviors.forEach(b => {
+    const finalize = (targetEnt: Entity, targetDef: EntityDefinition) => {
+      targetDef.behaviors?.forEach(b => {
         const behavior: Behavior = new b.type({
           game: this.game,
-          entity,
+          entity: targetEnt,
           ref: b._ref,
           values: b.values,
         });
-        entity.behaviors.push(behavior);
+        targetEnt.behaviors.push(behavior);
         if (!opts.inert) {
           behavior.setup();
           behavior[internal.implicitSetup]();
         }
       });
+
+      if (!opts.inert) targetEnt.#spawn();
+    };
+
+    for (const { entity, def } of spawnOrder) {
+      finalize(entity, def);
     }
-
-    if (!opts.inert) entity.#spawn();
-
-    def.children?.forEach(c => {
-      try {
-        entity[internal.entitySpawn](c, opts);
-      } catch (err) {
-        console.error(err);
-      }
-    });
 
     return entity;
   }
