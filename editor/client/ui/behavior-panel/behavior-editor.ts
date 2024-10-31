@@ -131,6 +131,7 @@ export class BehaviorEditor {
         this.behavior.values[key] = v as z.infer<typeof ValueSchema>;
         this.parent.sync();
       },
+      relatedEntity: this.parent.entity,
     });
 
     this.valueFields.set(key, [control, refresh]);

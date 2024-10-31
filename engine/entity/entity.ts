@@ -641,6 +641,7 @@ export abstract class Entity implements ISignalHandler {
     );
     if (opts.replicated) value.replicated = opts.replicated;
     value[internal.valueRelatedEntity] = this;
+    if (adapter) adapter.valueObj = value;
 
     Object.defineProperty(this, prop, {
       configurable: true,

@@ -1,10 +1,13 @@
 import {
   AudioAdapter,
+  calculateRelativeEntitySelector,
   ClientGame,
   ColorAdapter,
   Entity,
   EntityByRefAdapter,
+  EntityByRelativeSelector,
   EnumAdapter,
+  resolveEntityFromRelativeSelector,
   SpritesheetAdapter,
   TextureAdapter,
   ValueTypeTag,
@@ -24,6 +27,7 @@ interface ValueControlOptions<T> {
   default?: T;
   get: () => T;
   set: (value: T | undefined) => void;
+  relatedEntity: Entity;
 }
 
 const NumericSchema = z
@@ -342,9 +346,8 @@ export function createValueControl(
       return [container, refresh];
     }
 
+    case EntityByRelativeSelector:
     case EntityByRefAdapter: {
-      const opts = _opts as ValueControlOptions<string | undefined>;
-
       const valueDisplay = elem("code", {}, []);
       const clear = elem("button", { type: "button" }, [icon(X)]);
       const spacer = elem("div", { className: "spacer" });
@@ -371,17 +374,44 @@ export function createValueControl(
 
       control.addEventListener("drop", () => {
         const entity = getEntity();
-        if (entity !== null) opts.set(entity?.ref);
+        if (entity !== null) setEntity(entity);
       });
 
       clear.addEventListener("click", () => {
-        opts.set(undefined);
+        setEntity(undefined);
         refresh();
       });
 
+      const setEntity = (entity: Entity | undefined) => {
+        if (entity === undefined) {
+          _opts.set(undefined);
+          return;
+        }
+
+        if (_opts.typeTag === EntityByRefAdapter) {
+          const opts = _opts as ValueControlOptions<string | undefined>;
+          opts.set(entity.ref);
+        } else if (_opts.typeTag === EntityByRelativeSelector) {
+          const opts = _opts as ValueControlOptions<(string | null)[] | undefined>;
+          const selector = calculateRelativeEntitySelector(_opts.relatedEntity, entity);
+
+          opts.set(selector);
+        }
+      };
+
       const refresh = () => {
-        const value = opts.get();
-        const entity = value ? game.entities.lookupByRef(value) : undefined;
+        let entity: Entity | undefined;
+        if (_opts.typeTag === EntityByRefAdapter) {
+          const opts = _opts as ValueControlOptions<string | undefined>;
+          const value = opts.get();
+          entity = value ? game.entities.lookupByRef(value) : undefined;
+        } else if (_opts.typeTag === EntityByRelativeSelector) {
+          const opts = _opts as ValueControlOptions<(string | null)[] | undefined>;
+          const selector = opts.get();
+          if (selector !== undefined) {
+            entity = resolveEntityFromRelativeSelector(_opts.relatedEntity, selector);
+          }
+        }
 
         valueDisplay.style.opacity = entity === undefined ? "0.65" : "";
         const id =

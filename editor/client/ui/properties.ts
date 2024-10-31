@@ -211,6 +211,7 @@ export class Properties implements InspectorUIWidget {
         get: () => value.value,
         set: v => (value.value = v),
         default: undefined,
+        relatedEntity: entity,
       });
 
       valuesTable.addEntry(`value:${key}`, key, valueField);

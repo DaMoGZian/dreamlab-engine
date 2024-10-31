@@ -10,12 +10,18 @@
         {
           "type": "@core/SolidColor",
           "name": "SolidColor",
+          "enabled": true,
           "values": {
             "static": false,
             "hidden": false,
             "width": 2,
             "height": 2,
-            "color": "#8ace00ff"
+            "color": [
+              0.5411764979362488,
+              0.8078431487083435,
+              0,
+              1
+            ]
           },
           "transform": {
             "position": {
@@ -27,6 +33,7 @@
             {
               "type": "@core/UIPanel",
               "name": "UIPanel",
+              "enabled": true,
               "transform": {},
               "behaviors": [
                 {
@@ -39,12 +46,51 @@
             }
           ],
           "ref": "ent_f96eymr42kbiqrk2o9bb9hdq"
+        },
+        {
+          "type": "@core/Empty",
+          "name": "grnm,gdr",
+          "enabled": true,
+          "transform": {},
+          "behaviors": [
+            {
+              "ref": "bhv_mgph3c8i3rcj5a9px92sr666",
+              "script": "res://src/test-relative-value.ts",
+              "values": {
+                "e": [
+                  "Empty"
+                ]
+              }
+            }
+          ],
+          "children": [
+            {
+              "type": "@core/Empty",
+              "name": "Empty",
+              "enabled": true,
+              "transform": {},
+              "behaviors": [
+                {
+                  "ref": "bhv_zaa9stucchlzgcudle3s0frj",
+                  "script": "res://src/test-relative-value.ts",
+                  "values": {
+                    "e": [
+                      null
+                    ]
+                  }
+                }
+              ],
+              "ref": "ent_l6y9w2c99fn09mam46wosv2g"
+            }
+          ],
+          "ref": "ent_rnfnqlgcchh0dkin2g3tyklx"
         }
       ],
       "local": [
         {
           "type": "@core/Camera",
           "name": "Camera",
+          "enabled": true,
           "values": {
             "active": true,
             "smooth": 0.1,
@@ -57,6 +103,7 @@
         {
           "type": "@core/Empty",
           "name": "PlayerSpawnManager",
+          "enabled": true,
           "transform": {},
           "behaviors": [
             {

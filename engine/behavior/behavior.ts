@@ -167,6 +167,7 @@ export class Behavior implements ISignalHandler {
     );
     if (opts.replicated) value.replicated = opts.replicated;
     value[internal.valueRelatedEntity] = this.entity;
+    if (adapter) adapter.valueObj = value;
 
     Object.defineProperty(this, prop, {
       configurable: true,
