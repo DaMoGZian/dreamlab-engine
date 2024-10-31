@@ -56,9 +56,9 @@ export function loadFont(url: string): Promise<Font> {
       }
 
       try {
-        const texture = await PIXI.Assets.load(
-          new URL(font.pages[0], import.meta.url).toString(),
-        );
+        const _url = new URL(url, import.meta.url);
+        const _url2 = new URL(font.pages[0], _url);
+        const texture = await PIXI.Assets.load(_url2.toString());
 
         resolve(Object.assign(font, { texture }));
       } catch (error) {

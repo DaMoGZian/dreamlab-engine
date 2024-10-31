@@ -1,4 +1,4 @@
-import { Camera, ClientGame, Entity, GameStatus, Gizmo } from "@dreamlab/engine";
+import { Camera, ClientGame, Entity, GameStatus, Gizmo, Text } from "@dreamlab/engine";
 import * as internal from "@dreamlab/engine/internal";
 import { ReceivedInitialNetworkSnapshot } from "@dreamlab/proto/common/signals.ts";
 import { convertEntityDefinition, getSceneFromProject, ProjectSchema } from "@dreamlab/scene";
@@ -10,6 +10,7 @@ export const setupGame = async (
   conn: ClientConnection,
   editMode: boolean,
 ) => {
+  Text.FONT_SOURCE = "/text/Iosevka.fnt";
   await game.initialize();
 
   const projectDesc = await game
