@@ -1,4 +1,6 @@
+import { Entity } from "../entity/entity.ts";
 import { Game } from "../game.ts";
+import * as internal from "../internal.ts";
 import { Value } from "./value.ts";
 
 export type Primitive = string | number | boolean | undefined | null;
@@ -8,6 +10,8 @@ export type JsonObject = { [Key in string]?: JsonValue };
 export type JsonValue = Primitive | JsonArray | JsonObject;
 
 export abstract class ValueTypeAdapter<T> {
+  [internal.valueRelatedEntity]: Entity | undefined;
+
   constructor(
     public game: Game,
     public valueObj?: Value<T>,

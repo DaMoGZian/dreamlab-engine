@@ -53,8 +53,8 @@ export class EntityByRelativeSelector extends ValueTypeAdapter<Entity | undefine
   convertToPrimitive(value: Entity | undefined): JsonValue {
     if (value === undefined) return undefined;
 
-    if (!this.valueObj) throw new Error("unreachable");
-    const entity = this.valueObj[internal.valueRelatedEntity];
+    const entity =
+      this.valueObj?.[internal.valueRelatedEntity] ?? this[internal.valueRelatedEntity];
     if (!entity) throw new Error("unreachable");
 
     if (value.root !== entity.root) {
@@ -76,10 +76,10 @@ export class EntityByRelativeSelector extends ValueTypeAdapter<Entity | undefine
       );
     }
 
-    if (!this.valueObj) throw new Error("unreachable");
+    const entity =
+      this.valueObj?.[internal.valueRelatedEntity] ?? this[internal.valueRelatedEntity];
 
     const selector: (string | null)[] = value;
-    const entity = this.valueObj[internal.valueRelatedEntity];
     if (!entity) throw new Error("unreachable");
 
     return resolveEntityFromRelativeSelector(entity, selector);

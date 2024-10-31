@@ -136,6 +136,7 @@ export class Behavior implements ISignalHandler {
     let adapter: ValueTypeAdapter<T> | undefined;
     if (opts.type && (opts.type as AdapterTypeTag<T>).prototype instanceof ValueTypeAdapter) {
       adapter = new (opts.type as AdapterTypeTag<T>)(this.game, undefined);
+      adapter[internal.valueRelatedEntity] = this.entity;
     }
 
     if (this.#defaultValues[prop] !== undefined) {
