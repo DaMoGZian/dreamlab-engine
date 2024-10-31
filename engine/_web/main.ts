@@ -33,7 +33,7 @@ const game = new ClientGame({
   container,
 });
 
-Text.FONT_SOURCE = "text/Iosevka.fnt";
+Text.FONT_SOURCE_DIR = "/text/";
 
 await game.initialize();
 const camera = game.local.spawn({

@@ -7,6 +7,10 @@ import { Entity, EntityContext } from "../entity.ts";
 import { PixiEntity } from "../pixi-entity.ts";
 import { Camera } from "./camera.ts";
 
+type FontFace = enumAdapter.Union<typeof FontEnumAdapter>;
+const FontEnumAdapter = enumAdapter(["iosevka", "inter", "roboto", "roboto-slab", "easvhs"]);
+
+type Align = enumAdapter.Union<typeof AlignEnumAdapter>;
 const AlignEnumAdapter = enumAdapter(["left", "center", "right"]);
 
 export class Text extends PixiEntity {
@@ -17,13 +21,14 @@ export class Text extends PixiEntity {
   public static readonly icon: string = "🔡";
   readonly bounds = undefined;
 
-  static FONT_SOURCE = "";
-  static #font: Font | Promise<Font> | undefined;
+  static FONT_SOURCE_DIR = "";
+  static #fonts = new Map<FontFace, Font | Promise<Font> | undefined>();
 
+  font: FontFace = "inter";
   text: string = "Sample Text";
   color: string = "white";
   size: number = 24;
-  align: enumAdapter.Union<typeof AlignEnumAdapter> = "left";
+  align: Align = "left";
   outlineColor: string = "grey";
   outlineSize: number = 0;
   smoothing: number = 0.05;
@@ -39,6 +44,7 @@ export class Text extends PixiEntity {
 
     this.defineValues(
       Text,
+      "font",
       "text",
       "size",
       "outlineSize",
@@ -119,9 +125,13 @@ export class Text extends PixiEntity {
     return uvs;
   }
 
-  #reflow() {
-    const font = Text.#font;
-    if (!font || !("texture" in font)) throw new Error("font not loaded");
+  async #reflow() {
+    let font = Text.#fonts.get(this.font);
+    if (!font) {
+      font = loadFont(Text.FONT_SOURCE_DIR + `${this.font}.fnt`);
+    }
+
+    font = await font;
 
     if (!this.#shader) {
       const textColor = new PIXI.Color(this.color);
@@ -189,6 +199,8 @@ export class Text extends PixiEntity {
           },
         },
       });
+    } else {
+      this.#shader.resources.tSDF = font.texture.source;
     }
 
     const layout = createLayout({
@@ -232,18 +244,7 @@ export class Text extends PixiEntity {
     super.onInitialize();
     if (!this.container) return;
 
-    if (Text.#font === undefined) {
-      if (Text.FONT_SOURCE === "") {
-        throw new Error("font source url unset");
-      }
-
-      Text.#font = loadFont(Text.FONT_SOURCE);
-    }
-
-    const font = await Text.#font;
-    Text.#font = font;
-
-    this.#reflow();
+    await this.#reflow();
 
     const updateSize = () => {
       if (!this.#mesh) return;
@@ -254,6 +255,11 @@ export class Text extends PixiEntity {
         scale * this.globalTransform.scale.y,
       );
     };
+
+    const fontValue = this.values.get("font");
+    fontValue?.onChanged(() => {
+      this.#reflow();
+    });
 
     const textValue = this.values.get("text");
     textValue?.onChanged(() => {
