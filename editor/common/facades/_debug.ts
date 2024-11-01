@@ -30,7 +30,7 @@ abstract class DebugShape {
   protected entity: PixiEntity;
 
   // protected label: Label;
-  protected readonly gfx = new PIXI.Graphics();
+  readonly gfx = new PIXI.Graphics();
 
   protected readonly color: PIXI.ColorSource;
   protected readonly alpha: number;
@@ -112,6 +112,60 @@ export class DebugSquare extends DebugShape {
       .moveTo(bounds.x / -2 + offset, bounds.y / 2 - offset)
       .lineTo(bounds.x / 2 - offset, bounds.y / -2 + offset)
       .stroke({ color, width });
+  }
+}
+
+export class DebugCircle extends DebugShape {
+  redraw(): void {
+    const _bounds = this.entity.bounds;
+    if (!_bounds) return;
+    const radius = Vector2.mul(_bounds, this.entity.globalTransform.scale).x / 2;
+
+    this.gfx.alpha = this.alpha;
+    this.gfx.clear();
+    this.gfx.setStrokeStyle({
+      width: this.width,
+      color: this.color,
+      alignment: this.alignment,
+    });
+
+    const segments = Math.max(60, Math.ceil(radius / 2));
+    const points = Array.from({ length: segments }, (_, i) => {
+      const angle = (i / segments) * Math.PI * 2;
+      return new PIXI.Point(radius * Math.cos(angle), radius * Math.sin(angle));
+    });
+
+    this.gfx.poly(points);
+    this.gfx.stroke();
+  }
+}
+
+// TODO: fix capsule drawing
+export class DebugCapsule extends DebugShape {
+  redraw(): void {
+    const _bounds = this.entity.bounds;
+    if (!_bounds) return;
+
+    const width = Vector2.mul(_bounds, this.entity.globalTransform.scale).x;
+    const height = Vector2.mul(_bounds, this.entity.globalTransform.scale).y;
+    const radius = width / 2;
+
+    this.gfx.alpha = this.alpha;
+    this.gfx.clear();
+    this.gfx.setStrokeStyle({
+      width: this.width,
+      color: this.color,
+      alignment: this.alignment,
+    });
+
+    this.gfx
+      .moveTo(-width / 2, -height / 2 + radius)
+      .lineTo(-width / 2, height / 2 - radius)
+      .arcTo(-width / 2, height / 2, width / 2, height / 2, radius)
+      .lineTo(width / 2, -height / 2 + radius)
+      .arcTo(width / 2, -height / 2, -width / 2, -height / 2, radius)
+      .closePath()
+      .stroke();
   }
 }
 
