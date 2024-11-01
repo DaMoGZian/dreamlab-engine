@@ -5,11 +5,12 @@ import {
   BehaviorDescendantDestroyed,
   BehaviorDescendantSpawned,
   Entity,
-  EntityDescendantDestroyed,
   EntityDescendantRenamed,
   EntityDescendantReparented,
   EntityDescendantSpawned,
+  EntityDestroyOperation,
   EntityOwnEnableChanged,
+  EntitySpawnOperation,
   Game,
   GameStatus,
   GameStatusChange,
@@ -56,39 +57,39 @@ export const handleEntitySync: ClientNetworkSetupRoutine = (conn, game) => {
   let initialNetSpawnedEntityRefs = new Set<string>();
   let initialNetSpawnedEntities: (Entity | undefined)[] = [];
 
-  const syncSpawnEvent = (event: EntityDescendantSpawned) => {
+  game.on(EntitySpawnOperation, event => {
     if (game.status !== GameStatus.Running) return;
 
-    const entity = event.descendant;
+    if (event.from !== game.network.self) return;
+    const entity = event.entity;
+    if (entity.root !== game.world && entity.root !== game.prefabs) return;
     if (changeIgnoreSet.has(entity.ref)) return;
 
     const definition = serializeEntityDefinition(
       game,
-      entity.getDefinition(),
-      entity.parent!.ref,
+      entity.getDefinition(), // TODO: event.definition might not have refs filled in -- we should populate these manually instead of generating a whole def from the entity
+      event.entity.parent!.ref,
     );
 
     conn.send({
       t: "SpawnEntity",
       definition,
     });
-  };
+  });
 
-  const syncDestroyEvent = (event: EntityDescendantDestroyed) => {
+  game.on(EntityDestroyOperation, event => {
     if (game.status !== GameStatus.Running) return;
 
-    const entity = event.descendant;
+    if (event.from !== game.network.self) return;
+    const entity = event.entity;
+    if (entity.root !== game.world && entity.root !== game.prefabs) return;
     if (changeIgnoreSet.has(entity.ref)) return;
-    if (event.parentDestroyed) return;
 
-    conn.send({ t: "DeleteEntity", entity: entity.ref });
-  };
-
-  game.world.on(EntityDescendantSpawned, syncSpawnEvent);
-  game.prefabs.on(EntityDescendantSpawned, syncSpawnEvent);
-
-  game.world.on(EntityDescendantDestroyed, syncDestroyEvent);
-  game.prefabs.on(EntityDescendantDestroyed, syncDestroyEvent);
+    conn.send({
+      t: "DeleteEntity",
+      entity: entity.ref,
+    });
+  });
 
   const syncBehaviorSpawnEvent = (event: BehaviorDescendantSpawned) => {
     if (game.status !== GameStatus.Running) return;
@@ -190,12 +191,9 @@ export const handleEntitySync: ClientNetworkSetupRoutine = (conn, game) => {
         `entity sync: Tried to spawn underneath a non-existent entity! (${def.parent})`,
       );
     }
-
     const definition = await convertEntityDefinition(game, def);
-    const refs = getAllEntityRefs(definition);
-    changeIgnoreSet = changeIgnoreSet.union(refs);
-    parent.spawn(definition);
-    changeIgnoreSet = changeIgnoreSet.difference(refs);
+
+    parent[internal.entitySpawn](definition, { from: packet.from ?? "server" });
   });
 
   conn.registerPacketHandler("DeleteEntity", packet => {
@@ -205,9 +203,7 @@ export const handleEntitySync: ClientNetworkSetupRoutine = (conn, game) => {
       throw new Error(`entity sync: Tried to delete a non-existent entity! (${packet.entity})`);
     }
 
-    changeIgnoreSet.add(entity.ref);
-    entity.destroy();
-    changeIgnoreSet.delete(entity.ref);
+    entity[internal.entityDestroy]({ from: packet.from ?? "server" });
   });
 
   game.world.on(EntityDescendantReparented, event => {

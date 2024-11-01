@@ -1,5 +1,27 @@
-import { Entity } from "../entity/mod.ts";
+import { Entity, EntityDefinition } from "../entity/mod.ts";
+import { BaseGame } from "../game.ts";
+import { ConnectionId } from "../network.ts";
 import { exclusiveSignalType } from "../signal.ts";
+
+// this could be called "EntitySpawned" if we obliterated all the other ones.
+// that would be a breaking change though
+export class EntitySpawnOperation {
+  constructor(
+    public entity: Entity,
+    public definition: EntityDefinition,
+    public from: ConnectionId,
+  ) {}
+  [exclusiveSignalType] = BaseGame;
+}
+
+// this could be "EntityDestroyed"
+export class EntityDestroyOperation {
+  constructor(
+    public entity: Entity,
+    public from: ConnectionId,
+  ) {}
+  [exclusiveSignalType] = BaseGame;
+}
 
 /**
  * Fired when this entity spawns in for the first time -- Only really useful
