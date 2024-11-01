@@ -5,7 +5,7 @@ import {
   ColorAdapter,
   Entity,
   EntityByRefAdapter,
-  EntityByRelativeSelector,
+  RelativeEntity,
   EnumAdapter,
   resolveEntityFromRelativeSelector,
   SpritesheetAdapter,
@@ -346,7 +346,7 @@ export function createValueControl(
       return [container, refresh];
     }
 
-    case EntityByRelativeSelector:
+    case RelativeEntity:
     case EntityByRefAdapter: {
       const valueDisplay = elem("code", {}, []);
       const clear = elem("button", { type: "button" }, [icon(X)]);
@@ -391,7 +391,7 @@ export function createValueControl(
         if (_opts.typeTag === EntityByRefAdapter) {
           const opts = _opts as ValueControlOptions<string | undefined>;
           opts.set(entity.ref);
-        } else if (_opts.typeTag === EntityByRelativeSelector) {
+        } else if (_opts.typeTag === RelativeEntity) {
           const opts = _opts as ValueControlOptions<(string | null)[] | undefined>;
           const selector = calculateRelativeEntitySelector(_opts.relatedEntity, entity);
 
@@ -405,7 +405,7 @@ export function createValueControl(
           const opts = _opts as ValueControlOptions<string | undefined>;
           const value = opts.get();
           entity = value ? game.entities.lookupByRef(value) : undefined;
-        } else if (_opts.typeTag === EntityByRelativeSelector) {
+        } else if (_opts.typeTag === RelativeEntity) {
           const opts = _opts as ValueControlOptions<(string | null)[] | undefined>;
           const selector = opts.get();
           if (selector !== undefined) {
