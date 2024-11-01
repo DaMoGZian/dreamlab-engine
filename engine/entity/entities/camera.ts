@@ -200,10 +200,10 @@ export class Camera extends Entity {
     }
 
     const matrix = PIXI.Matrix.shared
-      .translate(-this.smoothed.position.x, this.smoothed.position.y)
-      .rotate(this.smoothed.rotation)
+      .translate(-this.globalTransform.position.x, this.globalTransform.position.y)
+      .rotate(this.#rotation)
       .scale(Camera.METERS_TO_PIXELS, Camera.METERS_TO_PIXELS)
-      .scale(1 / (this.smoothed.scale.x / scale), 1 / (this.smoothed.scale.y / scale))
+      .scale(1 / (this.#scale.x / scale), 1 / (this.#scale.y / scale))
       .translate(game.renderer.app.canvas.width / 2, game.renderer.app.canvas.height / 2);
 
     const { x, y } = matrix.apply({ x: position.x, y: -position.y });
@@ -223,10 +223,10 @@ export class Camera extends Entity {
     }
 
     const matrix = PIXI.Matrix.shared
-      .translate(-this.smoothed.position.x, this.smoothed.position.y)
-      .rotate(this.smoothed.rotation)
+      .translate(-this.globalTransform.position.x, this.globalTransform.position.y)
+      .rotate(this.#rotation)
       .scale(Camera.METERS_TO_PIXELS, Camera.METERS_TO_PIXELS)
-      .scale(1 / (this.smoothed.scale.x / scale), 1 / (this.smoothed.scale.y / scale))
+      .scale(1 / (this.#scale.x / scale), 1 / (this.#scale.y / scale))
       .translate(game.renderer.app.canvas.width / 2, game.renderer.app.canvas.height / 2);
 
     const { x, y } = matrix.applyInverse(position);

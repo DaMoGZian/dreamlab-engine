@@ -67,7 +67,7 @@ export class UIPanel extends Entity {
     const camera = Camera.getActive(this.game);
     if (!camera) return; // TODO: Cull when no camera exists
 
-    const pos = this.interpolated.position;
+    const pos = this.pos;
     const screen = camera.worldToScreen(pos);
 
     element.style.zIndex = this.z.toString();
@@ -76,10 +76,10 @@ export class UIPanel extends Entity {
 
     const { a, b, c, d, tx, ty } = PIXI.Matrix.shared
       .identity()
-      .rotate(camera.smoothed.rotation - this.interpolated.rotation)
+      .rotate(camera.globalTransform.rotation - this.globalTransform.rotation)
       .scale(
-        this.globalTransform.scale.x / camera.smoothed.scale.x,
-        this.globalTransform.scale.y / camera.smoothed.scale.y,
+        this.globalTransform.scale.x / camera.globalTransform.scale.x,
+        this.globalTransform.scale.y / camera.globalTransform.scale.y,
       );
 
     element.style.transform = `translateX(-50%) translateY(-50%) matrix(${a}, ${b}, ${c}, ${d}, ${tx}, ${ty})`;
