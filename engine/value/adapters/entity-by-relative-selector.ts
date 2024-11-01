@@ -43,7 +43,9 @@ export function resolveEntityFromRelativeSelector(entity: Entity, selector: (str
 }
 
 /**
- * This supports a `Value<Entity | undefined>`
+ * Allows you to attach a behavior to this entity by dragging it into the sidebar in the editor. If you copy or clone the entity, the relative relationships will be preserved.
+ * 
+ * Eg. if you copy from `prefabs` into `world`, the class properties will reference the entities that have been copied into the world.
  */
 export class RelativeEntity extends ValueTypeAdapter<Entity | undefined> {
   isValue(value: unknown): value is Entity | undefined {
