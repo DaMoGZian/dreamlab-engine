@@ -1,6 +1,9 @@
 import * as PIXI from "@dreamlab/vendor/pixi.ts";
+// @ts-ignore no typings
 import _loadFont from "https://esm.sh/load-bmfont@1.4.2";
+// @ts-ignore no typings
 import _createLayout from "npm:layout-bmfont-text@1.3.4";
+// @ts-ignore no typings
 import _createIndices from "npm:quad-indices@2.0.1";
 
 // TODO: Dynamically generate compatible SDF atlases with TinySDF
