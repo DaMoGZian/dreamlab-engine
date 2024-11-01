@@ -45,7 +45,7 @@ export function resolveEntityFromRelativeSelector(entity: Entity, selector: (str
 /**
  * This supports a `Value<Entity | undefined>`
  */
-export class EntityByRelativeSelector extends ValueTypeAdapter<Entity | undefined> {
+export class RelativeEntity extends ValueTypeAdapter<Entity | undefined> {
   isValue(value: unknown): value is Entity | undefined {
     if (value === undefined) return true;
     return value instanceof Entity;
@@ -58,9 +58,7 @@ export class EntityByRelativeSelector extends ValueTypeAdapter<Entity | undefine
     if (!entity) throw new Error("unreachable");
 
     if (value.root !== entity.root) {
-      throw new Error(
-        "EntityByRelativeSelector cannot be used to reference entities in different root!",
-      );
+      throw new Error("RelativeEntity cannot be used to reference entities in different root!");
     }
 
     return calculateRelativeEntitySelector(entity, value);
@@ -68,12 +66,10 @@ export class EntityByRelativeSelector extends ValueTypeAdapter<Entity | undefine
   convertFromPrimitive(value: JsonValue): Entity | undefined {
     if (value === undefined) return undefined;
     if (!Array.isArray(value))
-      throw new TypeError("An EntityByRelativeSelector value should be an array!");
+      throw new TypeError("An RelativeEntity value should be an array!");
 
     if (!value.every(x => typeof x === "string" || x === null)) {
-      throw new TypeError(
-        "Every element in EntityByRelativeSelector value array should be a string!",
-      );
+      throw new TypeError("Every element in RelativeEntity value array should be a string!");
     }
 
     const entity =

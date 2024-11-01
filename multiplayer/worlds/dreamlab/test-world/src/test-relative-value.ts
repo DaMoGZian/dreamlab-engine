@@ -1,9 +1,9 @@
-import { Behavior, Entity, EntityByRelativeSelector } from "@dreamlab/engine";
+import { Behavior, Entity, RelativeEntity } from "@dreamlab/engine";
 
 export default class Test extends Behavior {
   e: Entity | undefined = undefined;
 
   override setup(): void {
-    this.defineValue(Test, "e", { type: EntityByRelativeSelector });
+    this.defineValue(Test, "e", { type: RelativeEntity });
   }
 }
