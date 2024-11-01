@@ -32,12 +32,14 @@ import {
   EntityDescendantRenamed,
   EntityDescendantReparented,
   EntityDescendantSpawned,
+  EntityDestroyOperation,
   EntityDestroyed,
   EntityEnableChanged,
   EntityExclusiveAuthorityChanged,
   EntityOwnEnableChanged,
   EntityRenamed,
   EntityReparented,
+  EntitySpawnOperation,
   EntitySpawned,
   EntityTransformUpdate,
 } from "../signals/mod.ts";
@@ -309,7 +311,7 @@ export abstract class Entity implements ISignalHandler {
   // deno-lint-ignore no-explicit-any
   [internal.entitySpawn]<T extends Entity, C extends any[], B extends any[]>(
     def: EntityDefinition<T, C, B>,
-    opts: { inert?: boolean } = {},
+    opts: { inert?: boolean; from?: ConnectionId } = {},
   ) {
     const entity = Entity.#constructEntity(this, def);
     const spawnOrder: { entity: Entity; def: EntityDefinition }[] = [{ entity, def }];
@@ -341,6 +343,9 @@ export abstract class Entity implements ISignalHandler {
     for (const { entity, def } of spawnOrder) {
       finalize(entity, def);
     }
+
+    const from = opts.from ?? this.game.network.self;
+    this.game.fire(EntitySpawnOperation, entity, def, from);
 
     return entity;
   }
@@ -917,21 +922,25 @@ export abstract class Entity implements ISignalHandler {
 
   #destroyed: boolean = false;
 
-  destroy() {
+  [internal.entityDestroy](opts: { from?: ConnectionId } = {}) {
     if (this.#destroyed) return;
     this.#destroyed = true;
 
-    const parentDestroyed = this.parent ? this.parent.#destroyed : false;
+    const from = opts.from ?? this.game.network.self;
+    this.game.fire(EntityDestroyOperation, this, from);
 
-    this.fire(EntityDestroyed, parentDestroyed);
-    if (this.parent) {
-      this.parent.fire(EntityChildDestroyed, this, parentDestroyed);
-      this.parent.#children.delete(this.name);
+    {
+      const parentDestroyed = this.parent ? this.parent.#destroyed : false;
+      this.fire(EntityDestroyed, parentDestroyed);
+      if (this.parent) {
+        this.parent.fire(EntityChildDestroyed, this, parentDestroyed);
+        this.parent.#children.delete(this.name);
 
-      let ancestor: Entity | undefined = this.parent;
-      while (ancestor) {
-        ancestor.fire(EntityDescendantDestroyed, this, parentDestroyed);
-        ancestor = ancestor.parent;
+        let ancestor: Entity | undefined = this.parent;
+        while (ancestor) {
+          ancestor.fire(EntityDescendantDestroyed, this, parentDestroyed);
+          ancestor = ancestor.parent;
+        }
       }
     }
 
@@ -952,6 +961,10 @@ export abstract class Entity implements ISignalHandler {
     this.signalSubscriptionMap.clear();
 
     this.game[internal.entityTickingOrderDirty] = true;
+  }
+
+  destroy() {
+    this[internal.entityDestroy]();
   }
   // #endregion
 
