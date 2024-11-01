@@ -14,10 +14,10 @@ export class GamePostTick {
   [exclusiveSignalType] = BaseGame;
 }
 
-export class GamePreRender {
-  static __singleton = new this();
-  [exclusiveSignalType] = BaseGame;
-}
+// export class GamePreRender {
+//   static __singleton = new this();
+//   [exclusiveSignalType] = BaseGame;
+// }
 export class GameRender {
   static __singleton = new this();
   [exclusiveSignalType] = BaseGame;
