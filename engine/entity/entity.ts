@@ -951,7 +951,7 @@ export abstract class Entity implements ISignalHandler {
     for (const value of this.#values.values()) value.destroy();
 
     for (const child of this.#children.values()) {
-      child.destroy();
+      child[internal.entityDestroy](opts);
     }
 
     this.#parent = undefined;
