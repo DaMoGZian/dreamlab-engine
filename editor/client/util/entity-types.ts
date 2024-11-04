@@ -20,6 +20,7 @@ const categories = new Map<string, string[]>([
     ["@core/AnimatedSprite", "@core/Sprite", "@core/TilingSprite", "@core/VectorSprite"],
   ],
   ["UI", ["@core/UILayer", "@core/UIPanel"]],
+  ["Graphics", ["@core/RawPixi", "@core/ColoredSquare", "@core/ColoredPolygon"]],
 ]);
 
 export function createEntityMenu(
