@@ -11,21 +11,21 @@ export class SolidColor extends PixiEntity {
   }
 
   public static readonly icon = "🟪";
-  sides: number = 4;
+  get bounds(): Readonly<IVector2> | undefined {
+    // TODO: Reuse the same vector
+    return new Vector2(this.width, this.height);
+  }
+
   width: number = 1;
   height: number = 1;
   color: string = "white";
 
   #gfx: PIXI.Graphics | undefined;
 
-  get bounds(): Readonly<IVector2> | undefined {
-    return new Vector2(this.width, this.height);
-  }
-
   constructor(ctx: EntityContext) {
     super(ctx);
 
-    this.defineValues(SolidColor, "width", "height", "sides");
+    this.defineValues(SolidColor, "width", "height");
     this.defineValue(SolidColor, "color", { type: ColorAdapter });
 
     const updateGfx = () => {
@@ -33,14 +33,10 @@ export class SolidColor extends PixiEntity {
     };
 
     this.on(EntityTransformUpdate, updateGfx);
-
     const widthValue = this.values.get("width");
     const heightValue = this.values.get("height");
-    const sidesValue = this.values.get("sides");
-
     widthValue?.onChanged(updateGfx);
     heightValue?.onChanged(updateGfx);
-    sidesValue?.onChanged(updateGfx);
 
     const colorValue = this.values.get("color");
     colorValue?.onChanged(updateGfx);
@@ -49,24 +45,13 @@ export class SolidColor extends PixiEntity {
   #draw(): void {
     if (!this.#gfx) return;
 
-    if (this.sides < 3) {
-      console.warn("Invalid number of sides. Must be 3 or more.");
-      return;
-    }
-
     const width = this.width * this.globalTransform.scale.x;
     const height = this.height * this.globalTransform.scale.y;
     const color = new PIXI.Color(this.color);
-    const radius = Math.min(width, height) / 2;
-
-    this.#gfx.clear();
-
-    const points = Array.from({ length: this.sides }, (_, i) => {
-      const angle = (i / this.sides) * Math.PI * 2;
-      return new PIXI.Point(radius * Math.cos(angle), radius * Math.sin(angle));
-    });
-
-    this.#gfx.clear().poly(points, true).fill({ color: color, alpha: color.alpha });
+    this.#gfx
+      .clear()
+      .rect(-width / 2, -height / 2, width, height)
+      .fill({ color: color, alpha: color.alpha });
   }
 
   onInitialize() {
