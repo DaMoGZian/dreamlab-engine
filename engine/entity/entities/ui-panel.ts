@@ -92,10 +92,25 @@ export class UIPanel extends Entity {
     const element = document.createElement("div");
     this.#ui = { outer, root, element };
 
-    element.style.pointerEvents = "auto";
-    element.style.position = "absolute";
-    this.#updateDiv();
+    element.id = "root";
+    element.style.zIndex = this.z.toString();
 
+    const style = document.createElement("style");
+    const css = `
+#root {
+  position: absolute;
+  pointer-events: none;
+}
+
+#root > * {
+  pointer-events: auto;
+}
+`;
+
+    style.appendChild(document.createTextNode(css));
+    root.appendChild(style);
     root.appendChild(element);
+
+    this.#updateDiv();
   }
 }
