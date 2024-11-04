@@ -8,7 +8,7 @@ export class UIPanel extends Entity {
     Entity.registerType(this, "@core");
   }
 
-  public static readonly icon = "🖼️";
+  public static readonly icon = "🎨";
   readonly bounds: undefined;
 
   #ui: { outer: HTMLDivElement; root: ShadowRoot; element: HTMLDivElement } | undefined;

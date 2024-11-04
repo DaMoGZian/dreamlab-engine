@@ -7,7 +7,7 @@ export class RawPixi extends PixiEntity {
     Entity.registerType(this, "@core");
   }
 
-  public static readonly icon = "🎨";
+  public static readonly icon = "🖌️";
   readonly bounds: undefined; // TODO: bounds of gfx, this depends on non-centered bounds support
 }
 
