@@ -68,7 +68,8 @@ export class UIPanel extends Entity {
     if (!camera) return; // TODO: Cull when no camera exists
 
     const pos = this.pos;
-    const screen = camera.worldToScreen(pos);
+    const screen = camera.worldToScreen(pos); // TODO: this doesnt apply smoothing to position :(
+    // this is because adding smoothing to the worldToScreen() fn breaks other stuff
 
     element.style.zIndex = this.z.toString();
     element.style.left = screen.x.toString() + "px";
@@ -76,10 +77,10 @@ export class UIPanel extends Entity {
 
     const { a, b, c, d, tx, ty } = PIXI.Matrix.shared
       .identity()
-      .rotate(camera.globalTransform.rotation - this.globalTransform.rotation)
+      .rotate(camera.smoothed.rotation - this.globalTransform.rotation)
       .scale(
-        this.globalTransform.scale.x / camera.globalTransform.scale.x,
-        this.globalTransform.scale.y / camera.globalTransform.scale.y,
+        this.globalTransform.scale.x / camera.smoothed.scale.x,
+        this.globalTransform.scale.y / camera.smoothed.scale.y,
       );
 
     element.style.transform = `translateX(-50%) translateY(-50%) matrix(${a}, ${b}, ${c}, ${d}, ${tx}, ${ty})`;
