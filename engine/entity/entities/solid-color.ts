@@ -5,6 +5,9 @@ import { ColorAdapter } from "../../value/adapters/color-adapter.ts";
 import { Entity, EntityContext } from "../entity.ts";
 import { PixiEntity } from "../pixi-entity.ts";
 
+/**
+ * @deprecated Use `ColoredSquare` entity instead
+ */
 export class SolidColor extends PixiEntity {
   static {
     Entity.registerType(this, "@core");
