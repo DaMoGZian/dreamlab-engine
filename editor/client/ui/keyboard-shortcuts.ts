@@ -7,7 +7,6 @@ import {
   GizmoTranslateEnd,
   type ITransform,
 } from "@dreamlab/engine";
-import { SelectedEntityService } from "./selected-entity.ts";
 import {
   LocalRootFacade,
   PrefabRootFacade,
@@ -16,17 +15,15 @@ import {
 } from "../../common/mod.ts";
 import type { UndoRedoOperation } from "../undo-redo.ts";
 import { UndoRedoManager } from "../undo-redo.ts";
+import { SelectedEntityService } from "./selected-entity.ts";
 
 function isRoot(e: Entity): boolean {
-  if (
+  return (
     e instanceof WorldRootFacade ||
     e instanceof LocalRootFacade ||
     e instanceof ServerRootFacade ||
     e instanceof PrefabRootFacade
-  ) {
-    return true;
-  }
-  return false;
+  );
 }
 
 function filterChildNodes(toDelete: Entity[]) {
@@ -145,11 +142,6 @@ export function setupKeyboardShortcuts(
     if (document.activeElement instanceof HTMLInputElement) {
       return;
     }
-    for (const e of selectedService.entities) {
-      if (isRoot(e)) {
-        return;
-      }
-    }
     if ((window.getSelection()?.toString().length ?? 0) > 0) {
       return;
     }
@@ -158,6 +150,7 @@ export function setupKeyboardShortcuts(
     if (event.key === "e" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       for (const e of selectedService.entities) {
+        if (isRoot(e)) continue;
         e.enabled = !e.enabled;
       }
       return;
@@ -167,7 +160,7 @@ export function setupKeyboardShortcuts(
     if (event.key === "c" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       console.log("copy");
-      currentlyCopiedEntities = [...selectedService.entities];
+      currentlyCopiedEntities = [...selectedService.entities.filter(e => !isRoot(e))];
       return;
     }
 
