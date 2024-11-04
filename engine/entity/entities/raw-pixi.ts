@@ -11,6 +11,9 @@ export class RawPixi extends PixiEntity {
   readonly bounds: undefined; // TODO: bounds of gfx, this depends on non-centered bounds support
 }
 
+/**
+ * @deprecated Use `RawPixi` entity instead
+ */
 export class RawGraphics extends PixiEntity {
   static {
     Entity.registerType(this, "@core");
