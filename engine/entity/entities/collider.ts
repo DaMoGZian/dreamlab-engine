@@ -31,9 +31,6 @@ export class RectCollider extends Entity {
   constructor(ctx: EntityContext) {
     super(ctx);
     this.defineValue(RectCollider, "isSensor");
-    console.warn(
-      "RectCollider is deprecated. Use Collider with shape set to 'Rectangle' instead.",
-    );
   }
 
   onInitialize(): void {
