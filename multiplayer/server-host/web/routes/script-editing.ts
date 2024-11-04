@@ -235,7 +235,7 @@ export const serveScriptEditingAPI = (router: Router) => {
         instance.session?.broadcastPacket({
           t: "ScriptEdited",
           script_location: relativePath,
-          behavior_script_id: undefined
+          behavior_script_id: undefined,
         });
 
         return { success: true };
@@ -315,4 +315,34 @@ export const serveScriptEditingAPI = (router: Router) => {
       },
     ),
   );
+
+  router.get("/api/v1/edit/:instance_id/edited-files", async ctx => {
+    const instanceId = ctx.params.instance_id;
+    const instance = instances.get(instanceId);
+
+    if (instance === undefined) {
+      throw new JsonAPIError(Status.NotFound, "An instance with the given ID does not exist");
+    }
+
+    const worldFolder = instance.info.worldDirectory;
+    const filesWithVersion = [];
+
+    for await (const entry of fs.expandGlob("**/*", {
+      root: worldFolder,
+      exclude: ["node_modules", ".git", "_dist", "_dist_play", "*-esbuild.js"],
+    })) {
+      if (entry.isFile) {
+        const relativePath = path.relative(worldFolder, entry.path);
+        const stats = await Deno.stat(entry.path);
+        const lastModified = stats.mtime?.getTime() || Date.now();
+
+        filesWithVersion.push({
+          filePath: relativePath,
+          version: lastModified,
+        });
+      }
+    }
+
+    ctx.response.body = { files: filesWithVersion };
+  });
 };
