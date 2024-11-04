@@ -14,3 +14,5 @@ export * from "./tiling-sprite.ts";
 export * from "./ui-layer.ts";
 export * from "./ui-panel.ts";
 export * from "./vector-sprite.ts";
+export * from "./colored-polygon.ts";
+export * from "./colored-square.ts";
