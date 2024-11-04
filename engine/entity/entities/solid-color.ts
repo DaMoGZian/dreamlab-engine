@@ -67,8 +67,6 @@ export class SolidColor extends PixiEntity {
     });
 
     this.#gfx.clear().poly(points, true).fill({ color: color, alpha: color.alpha });
-
-    this.#gfx.rotation = Math.PI / 4;
   }
 
   onInitialize() {
