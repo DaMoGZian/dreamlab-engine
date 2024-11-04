@@ -146,8 +146,7 @@ export const handleEntitySync: ServerNetworkSetupRoutine = (net, game) => {
   net.registerPacketHandler("DeleteEntity", (from, packet) => {
     const entity = game.entities.lookupByRef(packet.entity);
     if (!entity) {
-      // throw new Error(`entity sync: Tried to delete a non-existent entity! (${packet.entity})`);
-      return
+      throw new Error(`entity sync: Tried to delete a non-existent entity! (${packet.entity})`);
     }
 
     entity[internal.entityDestroy]({ from });

@@ -922,12 +922,14 @@ export abstract class Entity implements ISignalHandler {
 
   #destroyed: boolean = false;
 
-  [internal.entityDestroy](opts: { from?: ConnectionId } = {}) {
+  [internal.entityDestroy](opts: { from?: ConnectionId; isDescendent?: boolean } = {}) {
     if (this.#destroyed) return;
     this.#destroyed = true;
 
-    const from = opts.from ?? this.game.network.self;
-    this.game.fire(EntityDestroyOperation, this, from);
+    if (!opts.isDescendent) {
+      const from = opts.from ?? this.game.network.self;
+      this.game.fire(EntityDestroyOperation, this, from);
+    }
 
     {
       const parentDestroyed = this.parent ? this.parent.#destroyed : false;
@@ -951,7 +953,7 @@ export abstract class Entity implements ISignalHandler {
     for (const value of this.#values.values()) value.destroy();
 
     for (const child of this.#children.values()) {
-      child[internal.entityDestroy](opts);
+      child[internal.entityDestroy]({ from: opts.from, isDescendent: true });
     }
 
     this.#parent = undefined;
