@@ -21,13 +21,18 @@ const categories = new Map<string, string[]>([
   ],
   ["UI", ["@core/UILayer", "@core/UIPanel"]],
   ["Graphics", ["@core/RawPixi", "@core/ColoredSquare", "@core/ColoredPolygon"]],
+  ["Hidden", ["@core/RectCollider", "@core/RawGraphics", "@core/SolidColor"]], // deprecated entites
 ]);
 
 export function createEntityMenu(
   label: string,
   action: (type: EntityConstructor) => void,
 ): ContextMenuItem {
-  const entityTypes = getEntityTypes().filter(([_, namespace]) => namespace !== "@editor");
+  const hiddenEntities = new Set(categories.get("Hidden"));
+  const entityTypes = getEntityTypes()
+    .filter(([_type, namespace]) => namespace !== "@editor")
+    .filter(([type, namespace]) => !hiddenEntities.has(`${namespace}/${type.name}`));
+
   const entityLabel = (type: EntityConstructor): string => {
     if ("icon" in type && typeof type.icon === "string") return `${type.icon} ${type.name}`;
     return type.name;
@@ -35,6 +40,8 @@ export function createEntityMenu(
 
   const items: ContextMenuItem[] = [];
   for (const [category, names] of categories) {
+    if (category === "Hidden") continue;
+
     const categoryItems: ContextMenuItem[] = names
       .map(name => {
         const idx = entityTypes.findIndex(
