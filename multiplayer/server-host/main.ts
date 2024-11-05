@@ -28,6 +28,9 @@ Deno.addSignalListener("SIGTERM", () => {
 
 const args = cli.parseArgs(Deno.args, { string: ["spawn"], boolean: ["play-mode"] });
 
+// will talk about this in standup
+// PENDING: startInstanceCollector(..)
+
 await Promise.all([
   // boot instance
   (async () => {
