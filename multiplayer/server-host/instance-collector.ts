@@ -9,9 +9,9 @@ const instanceCollectorTask = () => {
     // instances bump idle time whenever a session gets a ping packet,
     // so we don't need to check player count.
 
-    const THREE_HOURS = 3 * 60 * 60 * 1000;
+    const TEN_MINUTES = 10 * 60 * 1000;
     const idleTime = Date.now() - instance.idleSince.getTime();
-    if (idleTime > THREE_HOURS) {
+    if (idleTime > TEN_MINUTES) {
       instance.logs.info("instance reaper: instance idled too long! shutting down", {
         idleTime,
       });
