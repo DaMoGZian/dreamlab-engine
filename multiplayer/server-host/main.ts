@@ -2,6 +2,7 @@ import * as cli from "jsr:@std/cli@1";
 import { NIL_UUID } from "jsr:@std/uuid@1/constants";
 import { CONFIG } from "./config.ts";
 import { Application } from "./deps/oak.ts";
+import { startInstanceCollector } from "./instance-collector.ts";
 import { createInstance, GameInstance } from "./instance.ts";
 import { setupWeb } from "./web/setup.ts";
 
@@ -28,8 +29,7 @@ Deno.addSignalListener("SIGTERM", () => {
 
 const args = cli.parseArgs(Deno.args, { string: ["spawn"], boolean: ["play-mode"] });
 
-// will talk about this in standup
-// PENDING: startInstanceCollector(..)
+startInstanceCollector();
 
 await Promise.all([
   // boot instance
