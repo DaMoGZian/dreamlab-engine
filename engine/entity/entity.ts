@@ -758,6 +758,16 @@ export abstract class Entity implements ISignalHandler {
     }
   }
 
+  #incomingNetworkTransform: Transform | undefined;
+  #incomingNetworkTransformTicks: number = 0;
+  [internal.transformFromNetwork](_from: ConnectionId, transform: Transform) {
+    this.#incomingNetworkTransform = transform;
+    this.#incomingNetworkTransformTicks = this.game.time.ticks;
+
+    this.transform[internal.transformForceUpdate](transform);
+    this.transform[internal.transformOnChanged]();
+  }
+
   constructor(ctx: EntityContext) {
     Entity.#ensureEntityTypeIsRegistered(new.target);
 
@@ -905,6 +915,8 @@ export abstract class Entity implements ISignalHandler {
     this.#prevScale.y = scale.y;
   }
   [internal.interpolationStartFrame](partial: number) {
+    // TODO: interpolate using this.#incomingNetworkTransform if it's in-date (150ms = 9 ticks)
+
     this.#interpolated.position.assign(
       Vector2.lerp(this.#prevPosition, this.globalTransform.position, partial),
     );
