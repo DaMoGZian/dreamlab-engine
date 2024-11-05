@@ -1,7 +1,7 @@
 import { Camera } from "../entity/mod.ts";
 import type { Game } from "../game.ts";
 import { actionSetHeld, inputsRegisterHandlers } from "../internal.ts";
-import { Vector2 } from "../math/mod.ts";
+import { IVector2, Vector2 } from "../math/mod.ts";
 import { BasicSignalHandler } from "../signal.ts";
 import {
   ActionBound,
@@ -185,34 +185,61 @@ export class Inputs extends BasicSignalHandler<Inputs> {
     }
   };
 
-  #onMouseOver = (ev: MouseEvent) => {
-    if (this.#screenCursor === undefined) {
-      this.#screenCursor = new Vector2(ev.offsetX, ev.offsetX);
-    } else {
-      this.#screenCursor.x = ev.offsetX;
-      this.#screenCursor.y = ev.offsetY;
-    }
-
-    const { world } = this.cursor;
-    if (world) this.fire(MouseOver, { screen: this.#screenCursor, world }, ev);
-  };
-
   #onMouseOut = (ev: MouseEvent) => {
     this.#screenCursor = undefined;
     this.fire(MouseOut, { screen: undefined, world: undefined }, ev);
   };
 
   #onMouseMove = (ev: MouseEvent) => {
-    if (this.#screenCursor === undefined) {
-      this.#screenCursor = new Vector2(ev.offsetX, ev.offsetX);
-    } else {
-      this.#screenCursor.x = ev.offsetX;
-      this.#screenCursor.y = ev.offsetY;
-    }
+    const mouse = { x: ev.clientX, y: ev.clientY } satisfies IVector2;
 
-    const { world } = this.cursor;
-    if (world) this.fire(MouseMove, { screen: this.#screenCursor, world }, ev);
+    // @ts-expect-error: we know its a client game
+    const canvas = this.#game.renderer.app.canvas as HTMLCanvasElement;
+    const canvasRect = canvas.getBoundingClientRect();
+    const canvasCoords = {
+      x: mouse.x - canvasRect.x,
+      y: mouse.y - canvasRect.y,
+    } satisfies IVector2;
+
+    const over = this.#isOverCanvas(ev, canvas, canvasRect, canvasCoords);
+    if (this.#screenCursor === undefined && over) {
+      // mouse over
+      this.#screenCursor = new Vector2(canvasCoords);
+
+      const { world } = this.cursor;
+      if (world) this.fire(MouseOver, { screen: this.#screenCursor, world }, ev);
+    } else if (this.#screenCursor === undefined && !over) {
+      // do nothing
+    } else if (this.#screenCursor !== undefined && over) {
+      // mouse move
+      this.#screenCursor.assign(canvasCoords);
+
+      const { world } = this.cursor;
+      if (world) this.fire(MouseMove, { screen: this.#screenCursor, world }, ev);
+    } else if (this.#screenCursor !== undefined && !over) {
+      // mouse out
+      this.#screenCursor = undefined;
+      this.fire(MouseOut, { screen: undefined, world: undefined }, ev);
+    }
   };
+
+  #isOverCanvas(
+    ev: MouseEvent,
+    canvas: HTMLCanvasElement,
+    canvasRect: DOMRect,
+    canvasCoords: IVector2,
+  ): boolean {
+    const target = ev.target as HTMLElement | null;
+    if (target === null) return false;
+    if (target === canvas) return true;
+
+    return (
+      canvasCoords.x >= 0 &&
+      canvasCoords.x <= canvasRect.width &&
+      canvasCoords.y >= 0 &&
+      canvasCoords.y <= canvasRect.height
+    );
+  }
 
   #onWheel = (ev: WheelEvent) => {
     const scale = Camera.METERS_TO_PIXELS;
@@ -243,13 +270,12 @@ export class Inputs extends BasicSignalHandler<Inputs> {
     globalThis.addEventListener("mouseup", this.#onMouseUp);
     globalThis.addEventListener("wheel", this.#onWheel, { passive: false });
     globalThis.addEventListener("blur", this.#clearActions);
+    globalThis.addEventListener("mousemove", this.#onMouseMove);
+    globalThis.addEventListener("mouseout", this.#onMouseOut);
     document.addEventListener("visibilitychange", this.#onVisibilityChange);
 
     const canvas = this.#game.renderer.app.canvas;
     canvas.addEventListener("contextmenu", this.#onContextMenu);
-    canvas.addEventListener("mouseover", this.#onMouseOver);
-    canvas.addEventListener("mouseout", this.#onMouseOut);
-    canvas.addEventListener("mousemove", this.#onMouseMove);
 
     return () => {
       globalThis.removeEventListener("keydown", this.#onKeyDown);
@@ -258,12 +284,11 @@ export class Inputs extends BasicSignalHandler<Inputs> {
       globalThis.removeEventListener("mouseup", this.#onMouseUp);
       globalThis.removeEventListener("wheel", this.#onWheel);
       globalThis.removeEventListener("blur", this.#clearActions);
+      globalThis.removeEventListener("mousemove", this.#onMouseMove);
+      globalThis.removeEventListener("mouseout", this.#onMouseOut);
       document.removeEventListener("visibilitychange", this.#onVisibilityChange);
 
       canvas.removeEventListener("contextmenu", this.#onContextMenu);
-      canvas.removeEventListener("mouseover", this.#onMouseOver);
-      canvas.removeEventListener("mouseout", this.#onMouseOut);
-      canvas.removeEventListener("mousemove", this.#onMouseMove);
     };
   }
   // #endregion
