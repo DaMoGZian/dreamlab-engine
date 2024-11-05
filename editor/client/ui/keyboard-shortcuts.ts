@@ -16,6 +16,9 @@ import {
 import type { UndoRedoOperation } from "../undo-redo.ts";
 import { UndoRedoManager } from "../undo-redo.ts";
 import { SelectedEntityService } from "./selected-entity.ts";
+import { connectionDetails } from "@dreamlab/client/util/server-url.ts";
+import { IconButton } from "../components/icon-button.ts";
+import { Check, Save } from "../_icons.ts";
 
 function isRoot(e: Entity): boolean {
   return (
@@ -84,6 +87,31 @@ export function setupKeyboardShortcuts(
 ) {
   let currentlyCopiedEntities: Entity[] = [];
   const cooldownManager = new CooldownManager();
+
+  const saveProject = async () => {
+    const url = new URL(connectionDetails.serverUrl);
+    url.pathname = `/api/v1/save-edit-session/${game.instanceId}`;
+
+    const saveButton = document.getElementById("save-button") as IconButton;
+    if (!saveButton) return;
+
+    const button = saveButton.querySelector("button")!;
+    try {
+      button.disabled = true;
+      await fetch(url, { method: "POST" });
+
+      button.style.backgroundColor = "rgb(var(--color-green) / 1)";
+      saveButton.setIcon(Check);
+
+      setTimeout(() => {
+        button.style.backgroundColor = "";
+        saveButton.setIcon(Save);
+      }, 3000);
+    } finally {
+      button.disabled = false;
+      window.parent.postMessage({ action: "reloadProject" }, "*");
+    }
+  };
 
   // TODO: do we want to move these signal listeners?
   game.on(GizmoTranslateEnd, ({ entity, previous: prev }) => {
@@ -189,7 +217,7 @@ export function setupKeyboardShortcuts(
             t: "create-entity",
             parentRef: x.parent!.ref,
             def: x.getDefinition(),
-          }) satisfies UndoRedoOperation,
+          } satisfies UndoRedoOperation),
       );
 
       UndoRedoManager._.push({ t: "compound", ops });
@@ -217,7 +245,7 @@ export function setupKeyboardShortcuts(
             t: "destroy-entity",
             parentRef: x.parent!.ref,
             def: x.getDefinition(),
-          }) satisfies UndoRedoOperation,
+          } satisfies UndoRedoOperation),
       );
 
       for (const entity of toDelete) {
@@ -256,6 +284,12 @@ export function setupKeyboardShortcuts(
       )
         selectedService.entities = [];
 
+      return;
+    }
+
+    if (event.key === "s" && event.ctrlKey) {
+      event.preventDefault();
+      saveProject();
       return;
     }
 
