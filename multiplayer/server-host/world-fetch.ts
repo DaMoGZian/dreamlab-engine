@@ -37,7 +37,7 @@ export const fetchWorld = async (instance: GameInstance) => {
     if (!pullStatus.success) {
       // TODO: we probably don't want to throw away in-flight edits if we're updating an edit instance's world
 
-      instance.logs.warn("Failed to pull latest changes. Resetting to latest remote changes.", {
+      instance.logs.warn("Failed to pull latest changes. Keeping current working state.", {
         exitCode: pullStatus.code,
       });
 
