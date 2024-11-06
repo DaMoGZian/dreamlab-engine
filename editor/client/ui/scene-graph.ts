@@ -144,6 +144,7 @@ export class SceneGraph implements InspectorUIWidget {
 
   renderEntry(ui: InspectorUI, parent: HTMLElement, entity: Entity) {
     if (entity instanceof EditorMetadataEntity) return;
+    if (this.entryElementMap.has(entity.ref)) return;
 
     const currentEntityRef = entity.ref;
 
